@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  bitbucket-custom-services:
+    image: sergbarkouski/bitbucket-custom-services:latest
+    container_name: bitbucket-custom-services
+    ports:
+      - "7799:7799"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:7799
+    volumes:
+      - ./data:/app/wwwroot/data
+      - ./seed-config.json:/app/seed-config.json
+    restart: unless-stopped
+    networks:
+      - bitbucket-network
+
+networks:
+  bitbucket-network:
+    driver: bridge

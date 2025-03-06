@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Management - Bitbucket Custom Services</title>
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        dark: {
+                            100: '#1f2937',
+                            200: '#111827',
+                            300: '#0f172a',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 15px 0 rgba(0, 0, 0, 0.05)',
+                        'deep': '0 5px 30px 0 rgba(0, 0, 0, 0.1)',
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .card {
+                @apply bg-white shadow-soft border-0 rounded-lg p-6;
+            }
+            
+            .btn-primary {
+                @apply px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-md hover:from-primary-700 hover:to-primary-600 transition-all duration-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 shadow-sm;
+            }
+            
+            .btn-secondary {
+                @apply px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 transition-all duration-200 border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 shadow-sm;
+            }
+            
+            .btn-action {
+                @apply px-3.5 py-2 bg-primary-50 text-primary-600 rounded-md hover:bg-primary-100 transition-all duration-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2;
+            }
+            
+            .btn-icon {
+                @apply p-2 text-gray-500 rounded-md hover:bg-gray-100 transition-all duration-200 focus:outline-none;
+            }
+            
+            .form-input {
+                @apply w-full px-3.5 py-2.5 bg-white rounded-md border border-gray-300 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm;
+            }
+            
+            .form-label {
+                @apply block text-sm font-medium text-gray-700 mb-1.5;
+            }
+            
+            .badge {
+                @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+            }
+            
+            .badge-primary {
+                @apply bg-primary-100 text-primary-800;
+            }
+            
+            .badge-success {
+                @apply bg-green-100 text-green-800;
+            }
+            
+            .badge-gray {
+                @apply bg-gray-100 text-gray-800;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="h-full bg-gray-50 text-gray-800 font-sans antialiased">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-14 items-center">
+                <div class="flex items-center">
+                    <svg class="w-8 h-8 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <h1 class="ml-3 text-xl font-semibold text-gray-800">
+                        Users Management
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="/management" class="btn-secondary flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Management
+                    </a>
+                    <button onclick="logout()" class="btn-secondary flex items-center text-red-600 hover:bg-red-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-sm text-blue-700">
+                    <strong>Note:</strong> When a user's role is changed, they will be automatically logged out and must log back in for changes to take effect.
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Users</h2>
+                <p class="mt-1 text-sm text-gray-600">Manage system users and their roles</p>
+            </div>
+            <button onclick="openCreateModal()" class="btn-primary flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Create User
+            </button>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card animate-fadeIn">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Access</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y divide-gray-200">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create/Edit User Modal -->
+    <div id="user-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity modal-overlay" onclick="closeUserModal()"></div>
+            
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-6 pt-5 pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="modal-title" class="text-lg font-semibold text-gray-900">Create User</h3>
+                        <button onclick="closeUserModal()" class="btn-icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <form id="user-form" class="space-y-4">
+                        <input type="hidden" id="user-id" />
+                        
+                        <div>
+                            <label for="username" class="form-label">Username *</label>
+                            <input type="text" id="username" class="form-input" required />
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" id="email" class="form-input" required />
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="form-label">
+                                Password <span id="password-optional" class="text-gray-500">(leave blank to keep current)</span> *
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="password" id="password" class="form-input flex-1" />
+                                <button type="button" onclick="generatePassword()" class="btn-action whitespace-nowrap flex items-center px-3">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                    </svg>
+                                    Generate
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Role (Select One)</label>
+                            <div id="roles-container" class="space-y-2 mt-2">
+                                <!-- Role radio buttons will be loaded here -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-3 sm:flex sm:flex-row-reverse">
+                    <button onclick="saveUser()" class="btn-primary w-full sm:w-auto sm:ml-3">
+                        <span id="save-btn-text">Create</span>
+                    </button>
+                    <button onclick="closeUserModal()" class="btn-secondary w-full sm:w-auto mt-3 sm:mt-0">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Access Modal -->
+    <div id="access-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity modal-overlay" onclick="closeAccessModal()"></div>
+            
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+                <div class="bg-white px-6 pt-5 pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <span id="access-modal-title">Manage Repository Access</span>
+                        </h3>
+                        <button onclick="closeAccessModal()" class="btn-icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Add Repository Section -->
+                    <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                        <label class="form-label">Add Repository Access</label>
+                        <div class="flex gap-2">
+                            <select id="repository-select" class="form-input flex-1">
+                                <option value="">Select a repository...</option>
+                            </select>
+                            <button onclick="addRepositoryAccess()" class="btn-primary whitespace-nowrap">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="access-content" class="space-y-4 max-h-96 overflow-y-auto">
+                        <!-- Access information will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-3 flex justify-end">
+                    <button onclick="closeAccessModal()" class="btn-secondary">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity modal-overlay" onclick="closeDeleteModal()"></div>
+            
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-6 pt-5 pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg font-medium text-gray-900">Delete User</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Are you sure you want to delete <strong id="delete-user-name"></strong>? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-3 sm:flex sm:flex-row-reverse">
+                    <button onclick="confirmDelete()" class="btn-primary bg-red-600 hover:bg-red-700 w-full sm:w-auto sm:ml-3">
+                        Delete
+                    </button>
+                    <button onclick="closeDeleteModal()" class="btn-secondary w-full sm:w-auto mt-3 sm:mt-0">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 hidden animate-fadeIn">
+        <div class="px-5 py-4 rounded-lg shadow-deep bg-white border border-gray-100 max-w-md">
+            <div class="flex items-center">
+                <div id="toast-icon" class="flex-shrink-0 w-6 h-6 mr-3"></div>
+                <span class="text-gray-800 text-sm font-medium" id="toast-message"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let users = [];
+        let availableRoles = [];
+        let currentUserId = null;
+        let userToDelete = null;
+
+        // Generate random password
+        function generatePassword() {
+            const length = 10;
+            const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+            let password = '';
+            
+            // Ensure at least one of each required character type
+            const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+            const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const numbers = '0123456789';
+            const special = '!@#$%^&*';
+            
+            // Add one of each required type
+            password += lowercase[Math.floor(Math.random() * lowercase.length)];
+            password += uppercase[Math.floor(Math.random() * uppercase.length)];
+            password += numbers[Math.floor(Math.random() * numbers.length)];
+            password += special[Math.floor(Math.random() * special.length)];
+            
+            // Fill the rest randomly
+            for (let i = password.length; i < length; i++) {
+                password += charset[Math.floor(Math.random() * charset.length)];
+            }
+            
+            // Shuffle the password to randomize the position of required characters
+            password = password.split('').sort(() => Math.random() - 0.5).join('');
+            
+            // Set the password field
+            const passwordInput = document.getElementById('password');
+            passwordInput.type = 'text'; // Show the generated password
+            passwordInput.value = password;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(password).then(() => {
+                showToast('Password generated and copied to clipboard');
+            }).catch(() => {
+                showToast('Password generated (copy manually)');
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadRoles();
+            await loadUsers();
+        });
+
+        // Load all users
+        async function loadUsers() {
+            try {
+                const response = await axios.get('/api/users/all');
+                users = response.data;
+                renderUsers();
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showToast('Failed to load users', true);
+            }
+        }
+
+        // Load available roles
+        async function loadRoles() {
+            try {
+                const response = await axios.get('/api/roles');
+                availableRoles = response.data;
+            } catch (error) {
+                console.error('Error loading roles:', error);
+                showToast('Failed to load roles', true);
+            }
+        }
+
+        // Render users table
+        function renderUsers() {
+            const tbody = document.getElementById('users-table-body');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                            No users found. Create your first user to get started.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${escapeHtml(user.userName)}</div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-600">${escapeHtml(user.email)}</div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${user.roles && user.roles.length > 0 
+                                ? user.roles.map(role => `<span class="badge badge-primary">${escapeHtml(role)}</span>`).join('')
+                                : '<span class="text-sm text-gray-400">No roles</span>'
+                            }
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        ${user.roles && (user.roles.includes('Admin') || user.roles.includes('Moderator'))
+                            ? `<span class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-md">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Full Access
+                            </span>`
+                            : `<button onclick="manageUserAccess('${user.id}')" class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                </svg>
+                                ${user.repositoryCount > 0 
+                                    ? `${user.repositoryCount} ${user.repositoryCount === 1 ? 'Repo' : 'Repos'}`
+                                    : 'Manage Access'
+                                }
+                            </button>`
+                        }
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="openEditModal('${user.id}')" class="text-primary-600 hover:text-primary-900 mr-3">
+                            Edit
+                        </button>
+                        <button onclick="openDeleteModal('${user.id}')" class="text-red-600 hover:text-red-900">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Open create modal
+        function openCreateModal() {
+            currentUserId = null;
+            document.getElementById('modal-title').textContent = 'Create User';
+            document.getElementById('save-btn-text').textContent = 'Create';
+            document.getElementById('user-form').reset();
+            document.getElementById('password-optional').classList.add('hidden');
+            document.getElementById('password').required = true;
+            
+            renderRolesCheckboxes([]);
+            
+            document.getElementById('user-modal').classList.remove('hidden');
+        }
+
+        // Open edit modal
+        async function openEditModal(userId) {
+            currentUserId = userId;
+            document.getElementById('modal-title').textContent = 'Edit User';
+            document.getElementById('save-btn-text').textContent = 'Save';
+            document.getElementById('password-optional').classList.remove('hidden');
+            document.getElementById('password').required = false;
+            
+            try {
+                const response = await axios.get(`/api/users/${userId}`);
+                const user = response.data;
+                
+                document.getElementById('username').value = user.userName;
+                document.getElementById('email').value = user.email;
+                document.getElementById('password').value = '';
+                
+                renderRolesCheckboxes(user.roles || []);
+                
+                document.getElementById('user-modal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading user:', error);
+                showToast('Failed to load user details', true);
+            }
+        }
+
+        // Render roles radio buttons (single selection)
+        function renderRolesCheckboxes(selectedRoles) {
+            const container = document.getElementById('roles-container');
+            const selectedRole = selectedRoles.length > 0 ? selectedRoles[0] : '';
+            
+            container.innerHTML = availableRoles.map(role => `
+                <div class="flex items-center">
+                    <input type="radio" 
+                           name="role"
+                           id="role-${role}" 
+                           value="${role}" 
+                           ${selectedRole === role ? 'checked' : ''}
+                           class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300" />
+                    <label for="role-${role}" class="ml-2 block text-sm text-gray-700">
+                        ${escapeHtml(role)}
+                    </label>
+                </div>
+            `).join('');
+        }
+
+        // Close user modal
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.add('hidden');
+        }
+
+        // Save user (create or update)
+        async function saveUser() {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Get selected role (single radio button)
+            const selectedRoleInput = document.querySelector('#roles-container input[name="role"]:checked');
+            const selectedRole = selectedRoleInput ? selectedRoleInput.value : null;
+            
+            if (!username || !email) {
+                showToast('Username and email are required', true);
+                return;
+            }
+            
+            if (!selectedRole) {
+                showToast('Please select a role', true);
+                return;
+            }
+            
+            if (!currentUserId && !password) {
+                showToast('Password is required for new users', true);
+                return;
+            }
+            
+            // Send as array with single role for backend compatibility
+            const selectedRoles = [selectedRole];
+            
+            try {
+                if (currentUserId) {
+                    // Update user
+                    const updateData = {
+                        userName: username,
+                        email: email,
+                        roles: selectedRoles
+                    };
+                    
+                    // Only include password if it's provided
+                    if (password) {
+                        updateData.password = password;
+                    }
+                    
+                    await axios.put(`/api/users/${currentUserId}`, updateData);
+                    showToast('User updated successfully');
+                } else {
+                    // Create user
+                    await axios.post('/api/users', {
+                        userName: username,
+                        email: email,
+                        password: password,
+                        roles: selectedRoles
+                    });
+                    showToast('User created successfully');
+                }
+                
+                closeUserModal();
+                await loadUsers();
+            } catch (error) {
+                console.error('Error saving user:', error);
+                const message = error.response?.data || 'Failed to save user';
+                showToast(message, true);
+            }
+        }
+
+        // Open delete modal
+        function openDeleteModal(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            userToDelete = userId;
+            document.getElementById('delete-user-name').textContent = user.userName;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            userToDelete = null;
+            document.getElementById('delete-modal').classList.add('hidden');
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!userToDelete) return;
+            
+            try {
+                await axios.delete(`/api/users/${userToDelete}`);
+                showToast('User deleted successfully');
+                closeDeleteModal();
+                await loadUsers();
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                const message = error.response?.data || 'Failed to delete user';
+                showToast(message, true);
+            }
+        }
+
+        // State for access management
+        let currentAccessUserId = null;
+        let allRepositories = [];
+        let userRepositories = [];
+
+        // Manage user access
+        async function manageUserAccess(userId) {
+            currentAccessUserId = userId;
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            // Check if user is Admin or Moderator
+            if (user.roles && (user.roles.includes('Admin') || user.roles.includes('Moderator'))) {
+                showToast('Admin and Moderator roles have automatic access to all repositories', false);
+                return;
+            }
+            
+            document.getElementById('access-modal-title').textContent = `Manage Access: ${user.userName}`;
+            
+            try {
+                // Load all repositories and user's current repositories
+                const [allReposResponse, userReposResponse] = await Promise.all([
+                    axios.get('/api/repositories/all'),
+                    axios.get(`/api/users/${userId}/repositories`)
+                ]);
+                
+                console.log('All repositories response:', allReposResponse.data);
+                console.log('User repositories response:', userReposResponse.data);
+                
+                allRepositories = allReposResponse.data;
+                userRepositories = userReposResponse.data;
+                
+                // Populate repository select dropdown
+                populateRepositorySelect();
+                
+                // Render current access
+                renderUserRepositories();
+                
+                document.getElementById('access-modal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading repositories:', error);
+                console.error('Error details:', error.response?.data);
+                showToast('Failed to load repositories: ' + (error.response?.data || error.message), true);
+            }
+        }
+
+        // Populate repository select dropdown
+        function populateRepositorySelect() {
+            const select = document.getElementById('repository-select');
+            const userRepoIds = new Set(userRepositories.map(r => r.id || r.Id));
+            
+            // Filter out repositories user already has access to
+            const availableRepos = allRepositories.filter(r => !userRepoIds.has(r.id || r.Id));
+            
+            if (availableRepos.length === 0) {
+                select.innerHTML = '<option value="">All repositories assigned</option>';
+                select.disabled = true;
+            } else {
+                select.disabled = false;
+                select.innerHTML = '<option value="">Select a repository...</option>' + 
+                    availableRepos.map(repo => 
+                        `<option value="${repo.id || repo.Id}">${escapeHtml(repo.projectName || repo.ProjectName)} / ${escapeHtml(repo.name || repo.Name)}</option>`
+                    ).join('');
+            }
+        }
+
+        // Render user repositories
+        function renderUserRepositories() {
+            const accessContent = document.getElementById('access-content');
+            
+            if (userRepositories.length === 0) {
+                accessContent.innerHTML = `
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p class="text-gray-500 text-sm">This user has no repository access</p>
+                        <p class="text-gray-400 text-xs mt-2">Add repositories using the dropdown above</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group repositories by project
+            const projectMap = {};
+            userRepositories.forEach(repo => {
+                const projectId = repo.projectId || repo.ProjectId;
+                if (!projectMap[projectId]) {
+                    projectMap[projectId] = {
+                        projectId: projectId,
+                        projectName: repo.projectName || repo.ProjectName,
+                        repositories: []
+                    };
+                }
+                projectMap[projectId].repositories.push(repo);
+            });
+            
+            const projects = Object.values(projectMap);
+            
+            accessContent.innerHTML = projects.map(project => `
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <svg class="w-5 h-5 text-primary-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <h4 class="font-semibold text-gray-900">${escapeHtml(project.projectName)}</h4>
+                        <span class="ml-auto text-xs text-gray-500">${project.repositories.length} ${project.repositories.length === 1 ? 'repository' : 'repositories'}</span>
+                    </div>
+                    <div class="space-y-1.5 ml-7">
+                        ${project.repositories.map(repo => `
+                            <div class="flex items-center justify-between text-sm text-gray-700 bg-gray-50 rounded px-3 py-2">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                    </svg>
+                                    ${escapeHtml(repo.name || repo.Name)}
+                                </div>
+                                <button onclick="removeRepositoryAccess('${repo.id || repo.Id}')" class="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors" title="Remove access">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add repository access
+        async function addRepositoryAccess() {
+            const select = document.getElementById('repository-select');
+            const repositoryId = select.value;
+            
+            if (!repositoryId) {
+                showToast('Please select a repository', true);
+                return;
+            }
+            
+            try {
+                await axios.post(`/api/repositories/${repositoryId}/access`, {
+                    userId: currentAccessUserId
+                });
+                
+                showToast('Repository access added successfully');
+                
+                // Refresh the access data
+                const response = await axios.get(`/api/users/${currentAccessUserId}/repositories`);
+                userRepositories = response.data;
+                
+                // Update UI
+                populateRepositorySelect();
+                renderUserRepositories();
+                
+                // Refresh users list to update counts
+                await loadUsers();
+            } catch (error) {
+                console.error('Error adding repository access:', error);
+                const message = error.response?.data || 'Failed to add repository access';
+                showToast(message, true);
+            }
+        }
+
+        // Remove repository access
+        async function removeRepositoryAccess(repositoryId) {
+            if (!confirm('Are you sure you want to remove this repository access?')) {
+                return;
+            }
+            
+            try {
+                await axios.delete(`/api/repositories/${repositoryId}/access/${currentAccessUserId}`);
+                
+                showToast('Repository access removed successfully');
+                
+                // Refresh the access data
+                const response = await axios.get(`/api/users/${currentAccessUserId}/repositories`);
+                userRepositories = response.data;
+                
+                // Update UI
+                populateRepositorySelect();
+                renderUserRepositories();
+                
+                // Refresh users list to update counts
+                await loadUsers();
+            } catch (error) {
+                console.error('Error removing repository access:', error);
+                const message = error.response?.data || 'Failed to remove repository access';
+                showToast(message, true);
+            }
+        }
+
+        // Close access modal
+        function closeAccessModal() {
+            document.getElementById('access-modal').classList.add('hidden');
+        }
+
+        // Show toast notification
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+            
+            if (isError) {
+                toastIcon.innerHTML = `
+                    <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                `;
+            } else {
+                toastIcon.innerHTML = `
+                    <svg class="h-6 w-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                `;
+            }
+            
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await axios.get('/api/auth/logout');
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
+

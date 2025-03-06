@@ -1,0 +1,105 @@
+{
+  "Users": [
+    {
+      "UserName": "admin",
+      "Email": "admin@example.com",
+      "Password": "Admin!123",
+      "Role": "Admin"
+    },
+    {
+      "UserName": "moderator",
+      "Email": "moderator@example.com",
+      "Password": "Moderator!123",
+      "Role": "Moderator"
+    },
+    {
+      "UserName": "developer1",
+      "Email": "developer1@example.com",
+      "Password": "Dev!1234",
+      "Role": "User"
+    },
+    {
+      "UserName": "developer2",
+      "Email": "developer2@example.com",
+      "Password": "Dev!1234",
+      "Role": "User"
+    },
+    {
+      "UserName": "web",
+      "Email": "web@example.com",
+      "Password": "Web!1234",
+      "Role": "User"
+    }
+  ],
+  "Projects": [
+    {
+      "Name": "myproject",
+      "Repositories": [
+        {
+          "Name": "main-repo",
+          "MergeStrategy": "merge_commit",
+          "TelegramBotToken": "YOUR_TELEGRAM_BOT_TOKEN",
+          "TelegramChatId": "YOUR_TELEGRAM_CHAT_ID",
+          "BitbucketToken": "YOUR_BITBUCKET_TOKEN",
+          "BranchMappings": [
+            { "From": "main", "To": "develop" },
+            { "From": "develop", "To": "staging" },
+            { "From": "staging", "To": "production" }
+          ],
+          "NotificationSettings": { "IgnoreAutoMergeNotifications": true },
+          "UserNames": []
+        },
+        {
+          "Name": "api-repo",
+          "MergeStrategy": "squash",
+          "TelegramBotToken": "YOUR_TELEGRAM_BOT_TOKEN",
+          "TelegramChatId": "YOUR_TELEGRAM_CHAT_ID",
+          "BitbucketToken": "YOUR_BITBUCKET_TOKEN",
+          "BranchMappings": [
+            { "From": "main", "To": "develop" },
+            { "From": "develop", "To": "staging" }
+          ],
+          "NotificationSettings": { "IgnoreAutoMergeNotifications": false },
+          "UserNames": ["web", "developer1"]
+        },
+        {
+          "Name": "frontend-repo",
+          "MergeStrategy": "fast_forward",
+          "TelegramBotToken": null,
+          "TelegramChatId": null,
+          "BitbucketToken": "YOUR_BITBUCKET_TOKEN",
+          "BranchMappings": [],
+          "NotificationSettings": { "IgnoreAutoMergeNotifications": false },
+          "UserNames": ["web", "developer2"]
+        },
+        {
+          "Name": "minimal-repo",
+          "MergeStrategy": "merge_commit",
+          "TelegramBotToken": null,
+          "TelegramChatId": null,
+          "BitbucketToken": null,
+          "BranchMappings": [],
+          "NotificationSettings": null,
+          "UserNames": null
+        }
+      ]
+    },
+    {
+      "Name": "another-project",
+      "Repositories": [
+        {
+          "Name": "service-repo",
+          "MergeStrategy": "merge_commit",
+          "TelegramBotToken": "YOUR_TELEGRAM_BOT_TOKEN",
+          "TelegramChatId": "YOUR_TELEGRAM_CHAT_ID",
+          "BitbucketToken": "YOUR_BITBUCKET_TOKEN",
+          "BranchMappings": [
+            { "From": "main", "To": "develop" }
+          ],
+          "NotificationSettings": { "IgnoreAutoMergeNotifications": true },
+          "UserNames": []
+        }
+      ]
+    }
+  ]
+}
