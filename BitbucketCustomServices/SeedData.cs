@@ -18,13 +18,9 @@ public static class SeedData
     private const string DefaultAdminUsername = "admin";
     private const string DefaultAdminPassword = "Admin!123";
 
-    private static readonly string[] _standardRoles = [AdminRole, ModeratorRole, UserRole];
+    private static readonly string[] _standardRoles = SeedConfigHelper.StandardRoles;
 
-    private const EventType DefaultEventTypes = EventType.PullRequestApproved |
-                                                EventType.PullRequestCreated |
-                                                EventType.PullRequestDeclined |
-                                                EventType.PullRequestMerged |
-                                                EventType.PullRequestChangesRequested;
+    private static EventType DefaultEventTypes => SeedConfigHelper.DefaultEventTypes;
 
     public static async Task InitializeAsync(
         RoleManager<IdentityRole> roleManager,
@@ -148,7 +144,7 @@ public static class SeedData
                 continue;
 
             var repositories = projectConfig.Repositories
-                .Select(CreateRepositoryFromConfig)
+                .Select(SeedConfigHelper.CreateRepositoryFromConfig)
                 .ToList();
 
             var project = new Project
@@ -162,35 +158,6 @@ public static class SeedData
 
             await AssignUserAccessToRepositoriesAsync(dbContext, userManager, projectConfig, projectConfig.Name);
         }
-    }
-
-    private static RepositoryEntity CreateRepositoryFromConfig(SeedRepositoryConfiguration repoConfig)
-    {
-        return new RepositoryEntity
-        {
-            Name = repoConfig.Name,
-            MergeStrategy = repoConfig.MergeStrategy,
-            TelegramBotToken = repoConfig.TelegramBotToken ?? string.Empty,
-            TelegramChatId = repoConfig.TelegramChatId ?? string.Empty,
-            Users = [],
-            RepositoryNotificationSettings = new RepositoryNotificationSettings
-            {
-                EventType = DefaultEventTypes,
-                IgnoreAutoMergeNotifications = repoConfig.NotificationSettings?.IgnoreAutoMergeNotifications ?? false
-            },
-            RepositoryCredentials = new RepositoryCredentials
-            {
-                AuthType = AuthType.AuthToken,
-                Token = repoConfig.BitbucketToken ?? string.Empty
-            },
-            BranchMappings = repoConfig.BranchMappings
-                .Select(bm => new BranchMapping
-                {
-                    From = bm.From,
-                    To = bm.To
-                })
-                .ToList()
-        };
     }
 
     private static async Task AssignUserAccessToRepositoriesAsync(
@@ -256,18 +223,14 @@ public static class SeedData
         }
     }
 
-    private static bool IsValidUserConfig(SeedUserWithRoleConfiguration userConfig)
-    {
-        return !string.IsNullOrWhiteSpace(userConfig.UserName) &&
-               !string.IsNullOrWhiteSpace(userConfig.Email) &&
-               !string.IsNullOrWhiteSpace(userConfig.Password) &&
-               IsValidRole(userConfig.Role);
-    }
+    private static AuthType ResolveAuthType(SeedRepositoryConfiguration repoConfig) =>
+        SeedConfigHelper.ResolveAuthType(repoConfig);
 
-    private static bool IsValidRole(string? role)
-    {
-        return !string.IsNullOrEmpty(role) && _standardRoles.Contains(role);
-    }
+    private static bool IsValidUserConfig(SeedUserWithRoleConfiguration userConfig) =>
+        SeedConfigHelper.IsValidUserConfig(userConfig);
+
+    private static bool IsValidRole(string? role) =>
+        SeedConfigHelper.IsValidRole(role);
 
     private static SeedConfiguration? LoadSeedConfiguration(IConfiguration configuration)
     {

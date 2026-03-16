@@ -54,7 +54,10 @@
           "MergeStrategy": "squash",
           "TelegramBotToken": "YOUR_TELEGRAM_BOT_TOKEN",
           "TelegramChatId": "YOUR_TELEGRAM_CHAT_ID",
-          "BitbucketToken": "YOUR_BITBUCKET_TOKEN",
+          "AuthType": "Basic",
+          "UserEmail": "your-email@atlassian.com",
+          "UserToken": "YOUR_BITBUCKET_API_TOKEN",
+          "WebhookSecret": "YOUR_WEBHOOK_SECRET",
           "BranchMappings": [
             { "From": "main", "To": "develop" },
             { "From": "develop", "To": "staging" }

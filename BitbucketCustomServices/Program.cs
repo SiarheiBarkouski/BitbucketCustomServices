@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using BitbucketCustomServices;
 using BitbucketCustomServices.Endpoints.Auth;
@@ -15,6 +15,7 @@ using Serilog.Ui.Core.Extensions;
 using Serilog.Ui.SqliteDataProvider.Extensions;
 using Serilog.Ui.Web.Extensions;
 using Serilog.Ui.Web.Models;
+using BitbucketCustomServices.Handlers;
 using BitbucketCustomServices.Services;
 using BitbucketCustomServices.Services.Interfaces;
 
@@ -106,10 +107,14 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
 });
 
+builder.Services.AddSingleton<IWebhookJobChannel, WebhookJobChannel>();
+builder.Services.AddHostedService<WebhookJobProcessor>();
 builder.Services.AddScoped<IBitbucketService, BitbucketService>();
 builder.Services.AddScoped<IRepositoryService, RepositoryService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICascadeMergeService, CascadeMergeService>();
+builder.Services.AddScoped<IWebhookJobHandler, CascadeMergeJobHandler>();
+builder.Services.AddScoped<IWebhookJobHandler, TelegramNotificationJobHandler>();
 
 var app = builder.Build();
 
@@ -156,7 +161,6 @@ app.MapLoginEndpoints()
     .MapManagementUsersPageEndpoint()
     .MapConfigEditorEndpoint()
     .MapConfigSaveEndpoint()
-    .MapWebhookCascadeMergeEndpoint()
-    .MapWebhookTelegramNotificationEndpoint();
+    .MapWebhookEndpoint();
 
 app.Run("http://0.0.0.0:7799");

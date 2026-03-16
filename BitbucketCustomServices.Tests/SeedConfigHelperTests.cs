@@ -1,0 +1,162 @@
+using BitbucketCustomServices;
+using BitbucketCustomServices.Enums;
+using BitbucketCustomServices.Models;
+using Xunit;
+
+namespace BitbucketCustomServices.Tests;
+
+public class SeedConfigHelperTests
+{
+    [Theory]
+    [InlineData("Admin")]
+    [InlineData("Moderator")]
+    [InlineData("User")]
+    public void IsValidRole_WhenStandardRole_ReturnsTrue(string role)
+    {
+        Assert.True(SeedConfigHelper.IsValidRole(role));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("admin")]
+    [InlineData("MODERATOR")]
+    [InlineData("CustomRole")]
+    [InlineData("Guest")]
+    public void IsValidRole_WhenInvalid_ReturnsFalse(string? role)
+    {
+        Assert.False(SeedConfigHelper.IsValidRole(role));
+    }
+
+    [Fact]
+    public void ResolveAuthType_WhenUserEmailAndUserTokenSet_ReturnsBasic()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            UserEmail = "user@example.com",
+            UserToken = "token123"
+        };
+        Assert.Equal(AuthType.Basic, SeedConfigHelper.ResolveAuthType(config));
+    }
+
+    [Fact]
+    public void ResolveAuthType_WhenOnlyBitbucketTokenSet_ReturnsAuthToken()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            BitbucketToken = "ATCTT3x..."
+        };
+        Assert.Equal(AuthType.AuthToken, SeedConfigHelper.ResolveAuthType(config));
+    }
+
+    [Fact]
+    public void ResolveAuthType_WhenAuthTypeExplicitlyBasicAndCredsSet_ReturnsBasic()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            AuthType = "Basic",
+            UserEmail = "user@example.com",
+            UserToken = "token123"
+        };
+        Assert.Equal(AuthType.Basic, SeedConfigHelper.ResolveAuthType(config));
+    }
+
+    [Fact]
+    public void ResolveAuthType_WhenAuthTypeExplicitlyAuthToken_ReturnsAuthToken()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            AuthType = "AuthToken",
+            BitbucketToken = "ATCTT3x..."
+        };
+        Assert.Equal(AuthType.AuthToken, SeedConfigHelper.ResolveAuthType(config));
+    }
+
+    [Fact]
+    public void ResolveAuthType_WhenAuthTypeBasicButNoCreds_ReturnsAuthToken()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            AuthType = "Basic",
+            BitbucketToken = "ATCTT3x..."
+        };
+        Assert.Equal(AuthType.AuthToken, SeedConfigHelper.ResolveAuthType(config));
+    }
+
+    [Fact]
+    public void ResolveAuthType_WhenAuthTypeAuthTokenButHasBasicCreds_ReturnsAuthToken()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            AuthType = "AuthToken",
+            UserEmail = "user@example.com",
+            UserToken = "token123"
+        };
+        Assert.Equal(AuthType.AuthToken, SeedConfigHelper.ResolveAuthType(config));
+    }
+
+    [Fact]
+    public void IsValidUserConfig_WhenAllValid_ReturnsTrue()
+    {
+        var config = new SeedUserWithRoleConfiguration
+        {
+            UserName = "dev",
+            Email = "dev@example.com",
+            Password = "Pass123!",
+            Role = "User"
+        };
+        Assert.True(SeedConfigHelper.IsValidUserConfig(config));
+    }
+
+    [Fact]
+    public void IsValidUserConfig_WhenUserNameEmpty_ReturnsFalse()
+    {
+        var config = new SeedUserWithRoleConfiguration
+        {
+            UserName = "",
+            Email = "dev@example.com",
+            Password = "Pass123!",
+            Role = "User"
+        };
+        Assert.False(SeedConfigHelper.IsValidUserConfig(config));
+    }
+
+    [Fact]
+    public void IsValidUserConfig_WhenEmailEmpty_ReturnsFalse()
+    {
+        var config = new SeedUserWithRoleConfiguration
+        {
+            UserName = "dev",
+            Email = "",
+            Password = "Pass123!",
+            Role = "User"
+        };
+        Assert.False(SeedConfigHelper.IsValidUserConfig(config));
+    }
+
+    [Fact]
+    public void IsValidUserConfig_WhenPasswordEmpty_ReturnsFalse()
+    {
+        var config = new SeedUserWithRoleConfiguration
+        {
+            UserName = "dev",
+            Email = "dev@example.com",
+            Password = "",
+            Role = "User"
+        };
+        Assert.False(SeedConfigHelper.IsValidUserConfig(config));
+    }
+
+    [Fact]
+    public void IsValidUserConfig_WhenInvalidRole_ReturnsFalse()
+    {
+        var config = new SeedUserWithRoleConfiguration
+        {
+            UserName = "dev",
+            Email = "dev@example.com",
+            Password = "Pass123!",
+            Role = "CustomRole"
+        };
+        Assert.False(SeedConfigHelper.IsValidUserConfig(config));
+    }
+}

@@ -1015,7 +1015,7 @@
                                             <div class="form-group">
                                                 <label class="form-label"
                                                        for="repository-credentials-password">API Token</label>
-                                                <input type="password" id="repository-credentials-password"
+                                                <input type="text" id="repository-credentials-password"
                                                        name="password" class="form-input" placeholder="Bitbucket API token">
                                             </div>
                                         </div>
@@ -1026,6 +1026,12 @@
                                                 <input type="text" id="repository-credentials-token" name="token"
                                                        class="form-input" placeholder="Enter authentication token">
                                             </div>
+                                        </div>
+                                        <div class="form-group mt-4">
+                                            <label class="form-label" for="repository-webhook-secret">Webhook Secret (optional)</label>
+                                            <input type="password" id="repository-webhook-secret" name="webhookSecret"
+                                                   class="form-input" placeholder="Leave empty to skip signature verification">
+                                            <p class="mt-1 text-xs text-gray-500">If set, verifies X-Hub-Signature. Use one webhook URL per repository: <code class="text-xs">/webhook</code></p>
                                         </div>
                                     </div>
                                 </div>
@@ -1460,6 +1466,7 @@
         document.getElementById("repository-credentials-username").value = credentials?.username || "";
         document.getElementById("repository-credentials-password").value = credentials?.password || "";
         document.getElementById("repository-credentials-token").value = credentials?.token || "";
+        document.getElementById("repository-webhook-secret").value = selectedRepository.webhookSecret || "";
 
         // Toggle credentials fields based on auth type
         toggleCredentialsFields();
@@ -1622,6 +1629,7 @@
             mergeStrategy: document.getElementById("repository-merge-strategy").value,
             telegramBotToken: document.getElementById("repository-telegram-bot-token").value,
             telegramChatId: document.getElementById("repository-telegram-chat-id").value,
+            webhookSecret: document.getElementById("repository-webhook-secret").value || null,
             repositoryCredentials: {
                 authType: parseInt(document.getElementById("repository-credentials-auth-type").value),
                 username: document.getElementById("repository-credentials-username").value,

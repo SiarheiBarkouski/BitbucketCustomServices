@@ -1,4 +1,4 @@
-﻿namespace BitbucketCustomServices.Entities;
+namespace BitbucketCustomServices.Entities;
 
 public class Repository : EntityAutoIdentifier
 {
@@ -9,6 +9,8 @@ public class Repository : EntityAutoIdentifier
     public string TelegramBotToken { get; set; }
     
     public string TelegramChatId { get; set; }
+    
+    public string? WebhookSecret { get; set; }
     
     public virtual RepositoryCredentials RepositoryCredentials { get; set; }
     

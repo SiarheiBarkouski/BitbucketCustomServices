@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BitbucketCustomServices.Tests/BitbucketCustomServices.Tests.csproj" />
+  <Project Path="BitbucketCustomServices/BitbucketCustomServices.csproj" />
+</Solution>

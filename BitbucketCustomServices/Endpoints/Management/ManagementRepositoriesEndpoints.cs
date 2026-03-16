@@ -142,6 +142,7 @@ public static class ManagementRepositoriesEndpoints
             repository.MergeStrategy = updatedRepository.MergeStrategy;
             repository.TelegramBotToken = updatedRepository.TelegramBotToken;
             repository.TelegramChatId = updatedRepository.TelegramChatId;
+            repository.WebhookSecret = updatedRepository.WebhookSecret;
 
             if (updatedRepository.RepositoryCredentials != null)
             {

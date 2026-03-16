@@ -89,6 +89,19 @@ A web-based utility for managing Bitbucket repositories, pull requests, and auto
    - Open your browser and navigate to: `http://localhost:7799`
    - Login with your admin credentials
 
+## Testing
+
+Run unit tests:
+```bash
+dotnet test BitbucketCustomServices.slnx
+```
+
+Run tests with code coverage:
+```bash
+dotnet test BitbucketCustomServices.slnx --collect:"XPlat Code Coverage" --results-directory TestResults
+```
+Coverage report is written to `TestResults/<run-id>/coverage.cobertura.xml`.
+
 ## Seed Configuration
 
 The application uses `seed-config.json` to initialize the database with users, projects, and repositories. This file is **not stored in git** for security reasons and must be created manually.
@@ -103,7 +116,10 @@ The application uses `seed-config.json` to initialize the database with users, p
 2. Edit `seed-config.json` with your actual values:
    - Replace `YOUR_TELEGRAM_BOT_TOKEN` with your Telegram bot token
    - Replace `YOUR_TELEGRAM_CHAT_ID` with your Telegram chat ID
-   - Replace `YOUR_BITBUCKET_TOKEN` with your Bitbucket API tokens
+   - **Bitbucket auth** (choose one per repository):
+     - `BitbucketToken`: API token (AuthToken auth)
+     - `UserEmail` + `UserToken`: Atlassian email and API token (Basic auth for Bitbucket Cloud)
+     - `AuthType`: optional `"Basic"` or `"AuthToken"` to set explicitly; otherwise inferred from credentials
    - Update user credentials (username, email, password, role)
    - Configure projects, repositories, and branch mappings
 
@@ -291,6 +307,12 @@ Each repository object contains:
 - **Moderator**: Can manage projects and repositories, but cannot manage users
 - **User**: Can only view projects and repositories they have been granted access to
 
+### Webhooks
+
+Configure **one webhook URL per repository** in Bitbucket: `https://your-host:7799/webhook`
+
+The single `/webhook` endpoint handles all events (cascade merge, Telegram notifications). Events are routed internally by type. Optionally set a Webhook Secret in the repository Auth tab to verify `X-Hub-Signature`.
+
 ### Managing Repositories
 
 1. Go to the **Projects** tab
@@ -299,7 +321,7 @@ Each repository object contains:
    - Merge strategy
    - Branch mappings (cascade merge configuration)
    - Telegram notification settings
-   - Bitbucket authentication
+   - Bitbucket authentication (including optional webhook secret)
 
 ### Managing Users
 
