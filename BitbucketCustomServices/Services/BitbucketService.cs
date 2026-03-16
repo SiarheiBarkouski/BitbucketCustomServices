@@ -24,12 +24,13 @@ public sealed class BitbucketService : IBitbucketService
     public Task<HttpClient> GetAuthenticatedClient(RepositoryCredentials credentials)
     {
         var httpClient = _httpClientFactory.CreateClient();
+        httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
         httpClient.DefaultRequestHeaders.Authorization = credentials.AuthType switch
         {
             AuthType.Basic => new("Basic", Convert.ToBase64String(
-                Encoding.ASCII.GetBytes($"{credentials.Username}:{credentials.Password}"))),
-            AuthType.AuthToken => new("Bearer", credentials.Token),
+                Encoding.UTF8.GetBytes($"{credentials.Username?.Trim() ?? ""}:{credentials.Password?.Trim() ?? ""}"))),
+            AuthType.AuthToken => new("Bearer", credentials.Token?.Trim() ?? ""),
             _ => throw new ArgumentOutOfRangeException(nameof(credentials.AuthType),
                 $"Unknown auth type: {credentials.AuthType}")
         };
