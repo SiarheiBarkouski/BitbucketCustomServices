@@ -16,6 +16,7 @@ public class TelegramNotificationJobHandler : IWebhookJobHandler
     }
 
     public bool CanHandle(WebhookJob job) =>
+        job.Target is WebhookJobTarget.TelegramNotification &&
         job.EventType is not EventType.Default &&
         job.Repository != null && job.Repository.TelegramNotificationsEnabled;
 

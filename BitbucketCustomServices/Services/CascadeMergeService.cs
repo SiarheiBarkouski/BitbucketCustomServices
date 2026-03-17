@@ -81,11 +81,16 @@ public class CascadeMergeService : ICascadeMergeService
                         
                         await _bitbucketService.UpdatePullRequest(httpClient, workspace, repoSlug, createdPr.Id, conflictBranch, conflictTitle);
                         
-                        var success = await _notificationService.SendTelegramNotification(repository, createdPr, initialPrAuthor, EventType.MergeConflict);
+                        await _notificationService.SendTelegramNotification(repository, createdPr, initialPrAuthor, EventType.MergeConflict);
+                        
+                        successCount++;
+                        _logger.LogInformation("Conflict handled for {SourceBranch} → {TargetBranch}", destBranch, targetBranch);
                     }
-                    
-                    failureCount++;
-                    _logger.LogWarning("Merge failed for {SourceBranch} → {TargetBranch}", destBranch, targetBranch);
+                    else
+                    {
+                        failureCount++;
+                        _logger.LogWarning("Merge failed for {SourceBranch} → {TargetBranch}", destBranch, targetBranch);
+                    }
                 }
                 else
                 {

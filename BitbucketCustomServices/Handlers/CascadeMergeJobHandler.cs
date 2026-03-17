@@ -7,14 +7,20 @@ namespace BitbucketCustomServices.Handlers;
 
 public class CascadeMergeJobHandler : IWebhookJobHandler
 {
-    private readonly IServiceScopeFactory _scopeFactory;
+    private const int MaxRetries = 3;
+    private const int RetryDelayMs = 5000;
 
-    public CascadeMergeJobHandler(IServiceScopeFactory scopeFactory)
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IWebhookJobChannel _channel;
+
+    public CascadeMergeJobHandler(IServiceScopeFactory scopeFactory, IWebhookJobChannel channel)
     {
         _scopeFactory = scopeFactory;
+        _channel = channel;
     }
 
     public bool CanHandle(WebhookJob job) =>
+        job.Target is WebhookJobTarget.CascadeMerge &&
         job.EventType is EventType.PullRequestMerged &&
         !string.IsNullOrEmpty(job.PullRequestEvent.PullRequest?.Destination?.Branch?.Name) &&
         job.Repository != null && job.Repository.CascadeMergeEnabled;
@@ -50,7 +56,16 @@ public class CascadeMergeJobHandler : IWebhookJobHandler
             return;
         }
 
-        await cascadeMergeService.ProcessCascadeMerge(
+        var (successCount, failureCount) = await cascadeMergeService.ProcessCascadeMerge(
             repository, job.PullRequestEvent, job.Workspace, job.RepoSlug, destBranch);
+
+        if (failureCount > 0 && job.RetryCount < MaxRetries)
+        {
+            logger.LogInformation("Re-queuing cascade merge job for retry {Retry}/{Max} after {Delay}ms: {Workspace}/{RepoSlug}",
+                job.RetryCount + 1, MaxRetries, RetryDelayMs, job.Workspace, job.RepoSlug);
+            await Task.Delay(RetryDelayMs, cancellationToken);
+            var retryJob = job with { RetryCount = job.RetryCount + 1 };
+            await _channel.WriteAsync(retryJob, cancellationToken);
+        }
     }
 }

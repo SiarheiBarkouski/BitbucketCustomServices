@@ -28,14 +28,14 @@
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Endpoints/Webhooks/WebhookEndpoint.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Entities/Repository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Entities/RepositoryCredentials.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/CascadeMergeJobHandler.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/TelegramNotificationJobHandler.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/CascadeMergeJobHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/TelegramNotificationJobHandler.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Migrations/Init.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Models/SeedConfiguration.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Program.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/SeedData.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Services/BitbucketService.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Services/CascadeMergeService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Services/BitbucketService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Services/CascadeMergeService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Services/Interfaces/IRepositoryService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Services/RepositoryService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Services/WebhookSignatureVerifier.cs" root0="FORCE_HIGHLIGHTING" />
@@ -153,7 +153,7 @@
       <workItem from="1768470155547" duration="14866000" />
       <workItem from="1773650107780" duration="6722000" />
       <workItem from="1773658122483" duration="2988000" />
-      <workItem from="1773663019587" duration="3727000" />
+      <workItem from="1773663019587" duration="9574000" />
     </task>
     <servers />
   </component>
@@ -217,32 +217,6 @@
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/TelegramNotificationJobHandler.cs</url>
-          <line>41</line>
-          <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Handlers\TelegramNotificationJobHandler.cs" containingFunctionPresentation="Method 'HandleAsync'">
-            <startOffsets>
-              <option value="1742" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1784" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/CascadeMergeJobHandler.cs</url>
-          <line>23</line>
-          <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Handlers\CascadeMergeJobHandler.cs" containingFunctionPresentation="Method 'HandleAsync'">
-            <startOffsets>
-              <option value="834" />
-            </startOffsets>
-            <endOffsets>
-              <option value="880" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/BitbucketCustomServices/Endpoints/Webhooks/WebhookEndpoint.cs</url>
           <line>21</line>
           <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Endpoints\Webhooks\WebhookEndpoint.cs" containingFunctionPresentation="Lambda expression inside Method 'MapWebhookEndpoint'">
@@ -254,6 +228,32 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/BitbucketCustomServices/Services/WebhookSignatureVerifier.cs</url>
+          <line>16</line>
+          <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Services\WebhookSignatureVerifier.cs" containingFunctionPresentation="Method 'Verify'">
+            <startOffsets>
+              <option value="592" />
+            </startOffsets>
+            <endOffsets>
+              <option value="630" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/CascadeMergeJobHandler.cs</url>
+          <line>29</line>
+          <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Handlers\CascadeMergeJobHandler.cs" containingFunctionPresentation="Method 'HandleAsync'">
+            <startOffsets>
+              <option value="1077" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1123" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

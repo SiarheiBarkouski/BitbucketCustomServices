@@ -52,6 +52,7 @@ builder.Services
         .Enrich.FromLogContext()
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
         .WriteTo.SQLite(
+            maxDatabaseSize: 2048,
             sqliteDbPath: sqliteDbPath,
             retentionPeriod: TimeSpan.FromDays(7)));
 

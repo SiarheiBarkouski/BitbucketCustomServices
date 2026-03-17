@@ -8,4 +8,6 @@ public record WebhookJob(
     string RepoSlug,
     PullRequestEvent PullRequestEvent,
     EventType EventType,
-    RepositoryEntity? Repository = null);
+    WebhookJobTarget Target,
+    RepositoryEntity? Repository = null,
+    int RetryCount = 0);

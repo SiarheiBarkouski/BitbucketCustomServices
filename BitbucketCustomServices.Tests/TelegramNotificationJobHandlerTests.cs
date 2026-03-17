@@ -24,7 +24,7 @@ public class TelegramNotificationJobHandlerTests
             new Commit("h", DateTime.UtcNow, "m", new Author("a", "a", null!)));
         var pr = new PullRequest(dest, src, new Author("a", "a", null!), "Title", "", 1, [], []);
         var evt = new PullRequestEvent(new Actor("a"), pr, new Changes(new CommitChanges([]), new DiffChanges(null, null)));
-        return new WebhookJob("ws", "repo", evt, eventType, repository);
+        return new WebhookJob("ws", "repo", evt, eventType, WebhookJobTarget.TelegramNotification, repository);
     }
 
     [Fact]
@@ -155,7 +155,7 @@ public class TelegramNotificationJobHandlerTests
             new Commit("h", DateTime.UtcNow, "m", new Author("a", "a", null!)));
         var pr = new PullRequest(dest, src, new Author("a", "a", null!), "Auto branch merge for PR #1 (Dev)", "", 1, [], []);
         var evt = new PullRequestEvent(new Actor("a"), pr, new Changes(new CommitChanges([]), new DiffChanges(null, null)));
-        var job = new WebhookJob("ws", "repo", evt, EventType.PullRequestMerged);
+        var job = new WebhookJob("ws", "repo", evt, EventType.PullRequestMerged, WebhookJobTarget.TelegramNotification);
         var repo = new Entities.Repository
         {
             Name = "repo",

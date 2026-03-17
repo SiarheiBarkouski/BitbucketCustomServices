@@ -68,7 +68,7 @@ public class CascadeMergeServiceTests
     }
 
     [Fact]
-    public async Task ProcessCascadeMerge_WhenMergeFails_CreatesConflictBranchAndReturnsFailure()
+    public async Task ProcessCascadeMerge_WhenMergeFailsButConflictBranchCreated_ReturnsSuccess()
     {
         var pr = new PullRequest(
             new Destination(new Models.Repository("ws/repo"), new Branch("main"), new Commit("h", DateTime.UtcNow, "m", new Author("a", "a", new Models.User("u1", "a")))),
@@ -93,6 +93,35 @@ public class CascadeMergeServiceTests
         var notification = new Mock<INotificationService>();
         notification.Setup(x => x.SendTelegramNotification(It.IsAny<Entities.Repository>(), It.IsAny<PullRequest>(), It.IsAny<string>(), EventType.MergeConflict))
             .ReturnsAsync(true);
+        var logger = new Mock<ILogger<CascadeMergeService>>();
+        var service = new CascadeMergeService(bitbucket.Object, logger.Object, notification.Object);
+        var repo = CreateRepository("main", "develop");
+        var evt = CreatePullRequestEvent(99);
+
+        var (success, failure) = await service.ProcessCascadeMerge(repo, evt, "ws", "repo", "main");
+
+        Assert.Equal(1, success);
+        Assert.Equal(0, failure);
+    }
+
+    [Fact]
+    public async Task ProcessCascadeMerge_WhenMergeFailsAndConflictBranchCreationFails_ReturnsFailure()
+    {
+        var pr = new PullRequest(
+            new Destination(new Models.Repository("ws/repo"), new Branch("main"), new Commit("h", DateTime.UtcNow, "m", new Author("a", "a", new Models.User("u1", "a")))),
+            new Source(new Models.Repository("ws/repo"), new Branch("feature"), new Commit("h", DateTime.UtcNow, "m", new Author("a", "a", new Models.User("u1", "a")))),
+            new Author("Dev", "x", new Models.User("u1", "Dev")),
+            "Title", "Desc", 99, [], []);
+        var bitbucket = new Mock<IBitbucketService>();
+        var client = new HttpClient();
+        bitbucket.Setup(x => x.GetAuthenticatedClient(It.IsAny<RepositoryCredentials>())).ReturnsAsync(client);
+        bitbucket.Setup(x => x.CreatePullRequest(It.IsAny<HttpClient>(), "ws", "repo", "main", "develop", It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(pr);
+        bitbucket.Setup(x => x.MergePullRequest(It.IsAny<HttpClient>(), "ws", "repo", 99, It.IsAny<string>(), "merge_commit"))
+            .ReturnsAsync(false);
+        bitbucket.Setup(x => x.CreateBranch(It.IsAny<HttpClient>(), It.IsAny<RepositoryCredentials>(), "ws", "repo", It.IsAny<string>(), "h"))
+            .ReturnsAsync(false);
+        var notification = new Mock<INotificationService>();
         var logger = new Mock<ILogger<CascadeMergeService>>();
         var service = new CascadeMergeService(bitbucket.Object, logger.Object, notification.Object);
         var repo = CreateRepository("main", "develop");

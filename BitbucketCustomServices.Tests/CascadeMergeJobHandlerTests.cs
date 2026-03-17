@@ -28,7 +28,13 @@ public class CascadeMergeJobHandlerTests
         var pr = new PullRequest(
             dest, src, new Author("a", "a", null!), "Title", "", 1, [], []);
         var evt = new PullRequestEvent(new Actor("a"), pr, EmptyChanges);
-        return new WebhookJob("ws", "repo", evt, eventType, repository);
+        return new WebhookJob("ws", "repo", evt, eventType, WebhookJobTarget.CascadeMerge, repository);
+    }
+
+    private static CascadeMergeJobHandler CreateHandler(IServiceProvider sp, IWebhookJobChannel? channel = null)
+    {
+        var ch = channel ?? new Mock<IWebhookJobChannel>().Object;
+        return new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>(), ch);
     }
 
     [Fact]
@@ -36,7 +42,7 @@ public class CascadeMergeJobHandlerTests
     {
         var repo = new Entities.Repository { CascadeMergeEnabled = true };
         var sp = new ServiceCollection().BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var handler = CreateHandler(sp);
         var job = CreateJob(EventType.PullRequestMerged, "main", repo);
         Assert.True(handler.CanHandle(job));
     }
@@ -45,7 +51,7 @@ public class CascadeMergeJobHandlerTests
     public void CanHandle_WhenRepositoryNull_ReturnsFalse()
     {
         var sp = new ServiceCollection().BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var handler = CreateHandler(sp);
         var job = CreateJob(EventType.PullRequestMerged, "main", null);
         Assert.False(handler.CanHandle(job));
     }
@@ -54,7 +60,7 @@ public class CascadeMergeJobHandlerTests
     public void CanHandle_WhenEventTypeNotMerged_ReturnsFalse()
     {
         var sp = new ServiceCollection().BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var handler = CreateHandler(sp);
         var job = CreateJob(EventType.PullRequestCreated, "main");
         Assert.False(handler.CanHandle(job));
     }
@@ -63,7 +69,7 @@ public class CascadeMergeJobHandlerTests
     public void CanHandle_WhenDestBranchEmpty_ReturnsFalse()
     {
         var sp = new ServiceCollection().BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var handler = CreateHandler(sp);
         var job = CreateJob(EventType.PullRequestMerged, "");
         Assert.False(handler.CanHandle(job));
     }
@@ -72,7 +78,7 @@ public class CascadeMergeJobHandlerTests
     public void CanHandle_WhenDestBranchNull_ReturnsFalse()
     {
         var sp = new ServiceCollection().BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var handler = CreateHandler(sp);
         var job = CreateJob(EventType.PullRequestMerged, null);
         Assert.False(handler.CanHandle(job));
     }
@@ -82,7 +88,7 @@ public class CascadeMergeJobHandlerTests
     {
         var repo = new Entities.Repository { CascadeMergeEnabled = false };
         var sp = new ServiceCollection().BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var handler = CreateHandler(sp);
         var job = CreateJob(EventType.PullRequestMerged, "main", repo);
         Assert.False(handler.CanHandle(job));
     }
@@ -92,7 +98,7 @@ public class CascadeMergeJobHandlerTests
     {
         var repo = new Entities.Repository { CascadeMergeEnabled = true };
         var sp = new ServiceCollection().BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var handler = CreateHandler(sp);
         var job = CreateJob(EventType.PullRequestMerged, "main", repo);
         Assert.True(handler.CanHandle(job));
     }
@@ -111,17 +117,81 @@ public class CascadeMergeJobHandlerTests
         repoService.Setup(x => x.GetRepositoryByWorkspaceAndSlug("ws", "repo")).ReturnsAsync(repo);
         repoService.Setup(x => x.ValidateRepositoryCredentials(repo)).Returns(true);
         var cascadeMerge = new Mock<ICascadeMergeService>();
+        cascadeMerge.Setup(x => x.ProcessCascadeMerge(It.IsAny<Entities.Repository>(), It.IsAny<PullRequestEvent>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync((1, 0));
         var services = new ServiceCollection();
         services.AddScoped(_ => repoService.Object);
         services.AddScoped(_ => cascadeMerge.Object);
         services.AddLogging();
         var sp = services.BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
-        var job = CreateJob(EventType.PullRequestMerged);
+        var handler = CreateHandler(sp);
+        var job = CreateJob(EventType.PullRequestMerged, "main", repo);
 
         await handler.HandleAsync(job);
 
         cascadeMerge.Verify(x => x.ProcessCascadeMerge(repo, job.PullRequestEvent, "ws", "repo", "main"), Times.Once);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenFailuresAndRetriesAvailable_RequeuesJob()
+    {
+        var repo = new Entities.Repository
+        {
+            Name = "repo",
+            CascadeMergeEnabled = true,
+            MergeStrategy = "merge_commit",
+            BranchMappings = [new BranchMapping { From = "main", To = "develop" }],
+            RepositoryCredentials = new RepositoryCredentials { AuthType = AuthType.AuthToken, Token = "t" }
+        };
+        var repoService = new Mock<IRepositoryService>();
+        repoService.Setup(x => x.GetRepositoryByWorkspaceAndSlug("ws", "repo")).ReturnsAsync(repo);
+        repoService.Setup(x => x.ValidateRepositoryCredentials(repo)).Returns(true);
+        var cascadeMerge = new Mock<ICascadeMergeService>();
+        cascadeMerge.Setup(x => x.ProcessCascadeMerge(It.IsAny<Entities.Repository>(), It.IsAny<PullRequestEvent>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync((0, 1));
+        var channel = new Mock<IWebhookJobChannel>();
+        var services = new ServiceCollection();
+        services.AddScoped(_ => repoService.Object);
+        services.AddScoped(_ => cascadeMerge.Object);
+        services.AddLogging();
+        var sp = services.BuildServiceProvider();
+        var handler = CreateHandler(sp, channel.Object);
+        var job = CreateJob(EventType.PullRequestMerged, "main", repo);
+
+        await handler.HandleAsync(job);
+
+        channel.Verify(x => x.WriteAsync(It.Is<WebhookJob>(j => j.RetryCount == 1), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenFailuresAndMaxRetriesReached_DoesNotRequeue()
+    {
+        var repo = new Entities.Repository
+        {
+            Name = "repo",
+            CascadeMergeEnabled = true,
+            MergeStrategy = "merge_commit",
+            BranchMappings = [new BranchMapping { From = "main", To = "develop" }],
+            RepositoryCredentials = new RepositoryCredentials { AuthType = AuthType.AuthToken, Token = "t" }
+        };
+        var repoService = new Mock<IRepositoryService>();
+        repoService.Setup(x => x.GetRepositoryByWorkspaceAndSlug("ws", "repo")).ReturnsAsync(repo);
+        repoService.Setup(x => x.ValidateRepositoryCredentials(repo)).Returns(true);
+        var cascadeMerge = new Mock<ICascadeMergeService>();
+        cascadeMerge.Setup(x => x.ProcessCascadeMerge(It.IsAny<Entities.Repository>(), It.IsAny<PullRequestEvent>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync((0, 1));
+        var channel = new Mock<IWebhookJobChannel>();
+        var services = new ServiceCollection();
+        services.AddScoped(_ => repoService.Object);
+        services.AddScoped(_ => cascadeMerge.Object);
+        services.AddLogging();
+        var sp = services.BuildServiceProvider();
+        var handler = CreateHandler(sp, channel.Object);
+        var job = CreateJob(EventType.PullRequestMerged, "main", repo) with { RetryCount = 3 };
+
+        await handler.HandleAsync(job);
+
+        channel.Verify(x => x.WriteAsync(It.IsAny<WebhookJob>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -135,8 +205,8 @@ public class CascadeMergeJobHandlerTests
         services.AddScoped(_ => cascadeMerge.Object);
         services.AddLogging();
         var sp = services.BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
-        var job = CreateJob(EventType.PullRequestMerged);
+        var handler = CreateHandler(sp);
+        var job = CreateJob(EventType.PullRequestMerged, null);
 
         await handler.HandleAsync(job);
 
@@ -160,8 +230,8 @@ public class CascadeMergeJobHandlerTests
         services.AddScoped(_ => cascadeMerge.Object);
         services.AddLogging();
         var sp = services.BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
-        var job = CreateJob(EventType.PullRequestMerged);
+        var handler = CreateHandler(sp);
+        var job = CreateJob(EventType.PullRequestMerged, "main", repo);
 
         await handler.HandleAsync(job);
 
@@ -186,8 +256,8 @@ public class CascadeMergeJobHandlerTests
         services.AddScoped(_ => cascadeMerge.Object);
         services.AddLogging();
         var sp = services.BuildServiceProvider();
-        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
-        var job = CreateJob(EventType.PullRequestMerged);
+        var handler = CreateHandler(sp);
+        var job = CreateJob(EventType.PullRequestMerged, "main", repo);
 
         await handler.HandleAsync(job);
 

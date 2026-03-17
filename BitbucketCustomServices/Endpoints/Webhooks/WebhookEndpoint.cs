@@ -73,10 +73,13 @@ public static class WebhookEndpoint
                     return;
                 }
 
-                var job = new WebhookJob(workspace, repoSlug, prEvent, eventType, repository);
-                await channel.WriteAsync(job);
+                var telegramJob = new WebhookJob(workspace, repoSlug, prEvent, eventType, Enums.WebhookJobTarget.TelegramNotification, repository);
+                await channel.WriteAsync(telegramJob);
+                
+                var cascadeJob = new WebhookJob(workspace, repoSlug, prEvent, eventType, Enums.WebhookJobTarget.CascadeMerge, repository);
+                await channel.WriteAsync(cascadeJob);
 
-                logger.LogDebug("Webhook job enqueued for {Workspace}/{RepoSlug}, EventType: {EventType}",
+                logger.LogDebug("Webhook jobs enqueued for {Workspace}/{RepoSlug}, EventType: {EventType}",
                     workspace, repoSlug, eventType);
 
                 context.Response.StatusCode = (int)HttpStatusCode.OK;

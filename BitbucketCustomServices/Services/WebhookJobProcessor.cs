@@ -1,6 +1,7 @@
 using BitbucketCustomServices.Handlers;
 using BitbucketCustomServices.Models;
 using BitbucketCustomServices.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace BitbucketCustomServices.Services;
@@ -39,8 +40,8 @@ public class WebhookJobProcessor : BackgroundService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing webhook job for {Workspace}/{RepoSlug}, EventType: {EventType}",
-                        job.Workspace, job.RepoSlug, job.EventType);
+                    _logger.LogError(ex, "Webhook job failed for {Workspace}/{RepoSlug}, Target: {Target}, EventType: {EventType}",
+                        job.Workspace, job.RepoSlug, job.Target, job.EventType);
                 }
             }
         }
@@ -49,23 +50,9 @@ public class WebhookJobProcessor : BackgroundService
     private async Task ProcessJobAsync(WebhookJob job, CancellationToken cancellationToken)
     {
         using var scope = _scopeFactory.CreateScope();
-        var handlers = scope.ServiceProvider.GetServices<IWebhookJobHandler>().ToList();
-
-        foreach (var handler in handlers.Where(h => h.CanHandle(job)))
-        {
-            try
-            {
-                await handler.HandleAsync(job, cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Handler {Handler} failed for job {Workspace}/{RepoSlug}",
-                    handler.GetType().Name, job.Workspace, job.RepoSlug);
-            }
-        }
+        var handlers = scope.ServiceProvider.GetServices<IWebhookJobHandler>();
+        var handler = handlers.FirstOrDefault(h => h.CanHandle(job));
+        if (handler != null)
+            await handler.HandleAsync(job, cancellationToken);
     }
 }
