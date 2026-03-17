@@ -294,7 +294,7 @@
         }
 
         /* Authentication section fixes */
-        #basic-auth-fields, #token-auth-fields {
+        #basic-password-fields, #basic-token-fields, #auth-token-fields {
             width: 100%;
         }
 
@@ -305,7 +305,9 @@
 
         #repository-credentials-username,
         #repository-credentials-password,
-        #repository-credentials-token {
+        #repository-credentials-email,
+        #repository-credentials-token,
+        #repository-credentials-token-at {
             width: 100%;
             display: block;
         }
@@ -399,7 +401,9 @@
         #repository-credentials-auth-type,
         #repository-credentials-username,
         #repository-credentials-password,
-        #repository-credentials-token {
+        #repository-credentials-email,
+        #repository-credentials-token,
+        #repository-credentials-token-at {
             height: 40px;
             line-height: 1.5;
         }
@@ -515,12 +519,12 @@
             margin-bottom: 1.5rem;
         }
 
-        #basic-auth-fields, #token-auth-fields {
+        #basic-password-fields, #basic-token-fields, #auth-token-fields {
             margin-top: 1rem;
             animation: fadeIn 0.3s ease-out;
         }
 
-        #basic-auth-fields.hidden, #token-auth-fields.hidden {
+        #basic-password-fields.hidden, #basic-token-fields.hidden, #auth-token-fields.hidden {
             display: none !important;
             visibility: hidden;
             height: 0;
@@ -560,6 +564,7 @@
 
         /* Styling for the token input to better handle long tokens */
         #repository-credentials-token,
+        #repository-credentials-token-at,
         input[type="text"][value*="ATCTT"] {
             font-family: monospace;
             word-break: break-all;
@@ -942,7 +947,7 @@
                                     Authentication
                                 </button>
                             </li>
-                            <li role="presentation">
+                            <li role="presentation" id="branch-mappings-tab-li" data-feature="cascade-merge">
                                 <button class="repo-tab-btn px-6 py-2.5 text-gray-500 hover:text-gray-700 font-medium"
                                         id="branch-mappings-tab" data-tab="branch-mappings-content" type="button"
                                         role="tab" aria-controls="branch-mappings" aria-selected="false">
@@ -954,7 +959,7 @@
                                     Cascade merge
                                 </button>
                             </li>
-                            <li role="presentation">
+                            <li role="presentation" id="notifications-tab-li" data-feature="telegram-notifications">
                                 <button class="repo-tab-btn px-6 py-2.5 text-gray-500 hover:text-gray-700 font-medium"
                                         id="notifications-tab" data-tab="notifications-content" type="button" role="tab"
                                         aria-controls="notifications" aria-selected="false">
@@ -985,6 +990,27 @@
                                                class="form-input">
                                     </div>
                                 </div>
+                                <div class="mt-5">
+                                    <h3 class="text-base font-medium text-gray-700 mb-3">Features</h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                                            <input type="checkbox" id="cascade-merge-enabled" class="checkbox-custom"
+                                               onchange="updateTabVisibility()">
+                                        <label for="cascade-merge-enabled" class="ml-2 block text-sm text-gray-700">
+                                            Cascade merge
+                                            <span class="block text-xs text-gray-500 mt-1">When enabled, merged PRs trigger cascade merges to configured target branches. Requires Bitbucket credentials (Auth tab). Webhook secret optional.</span>
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                                        <input type="checkbox" id="telegram-notifications-enabled" class="checkbox-custom"
+                                               onchange="updateTabVisibility()">
+                                        <label for="telegram-notifications-enabled" class="ml-2 block text-sm text-gray-700">
+                                            Telegram notifications
+                                            <span class="block text-xs text-gray-500 mt-1">When enabled, PR events send Telegram notifications. Requires bot token and chat ID in Notifications tab. No Bitbucket auth needed. Webhook secret optional.</span>
+                                        </label>
+                                    </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -999,32 +1025,43 @@
                                                 Type</label>
                                             <select id="repository-credentials-auth-type" name="authType"
                                                     class="form-input">
-                                                <option value="0">Basic Authentication</option>
-                                                <option value="1">Auth Token</option>
+                                                <option value="0">Basic Password Auth</option>
+                                                <option value="1">Basic Token Auth</option>
+                                                <option value="2">Auth Token</option>
                                             </select>
                                         </div>
-                                        <div id="basic-auth-fields"
-                                             class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn"
-                                             style="display:grid;">
-                                            <div class="form-group">
-                                                <label class="form-label"
-                                                       for="repository-credentials-username">Email</label>
-                                                <input type="text" id="repository-credentials-username" name="username"
-                                                       class="form-input" placeholder="Atlassian account email">
+                                        <div id="credentials-fields-container">
+                                            <div id="basic-password-fields"
+                                                 class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
+                                                <div class="form-group">
+                                                    <label class="form-label" for="repository-credentials-username">Username</label>
+                                                    <input type="text" id="repository-credentials-username" name="username"
+                                                           class="form-input" placeholder="Bitbucket username">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="repository-credentials-password">Password</label>
+                                                    <input type="password" id="repository-credentials-password" name="password"
+                                                           class="form-input" placeholder="Bitbucket password">
+                                                </div>
                                             </div>
-                                            <div class="form-group">
-                                                <label class="form-label"
-                                                       for="repository-credentials-password">API Token</label>
-                                                <input type="text" id="repository-credentials-password"
-                                                       name="password" class="form-input" placeholder="Bitbucket API token">
+                                            <div id="basic-token-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
+                                                <div class="form-group">
+                                                    <label class="form-label" for="repository-credentials-email">Email</label>
+                                                    <input type="text" id="repository-credentials-email" name="email"
+                                                           class="form-input" placeholder="Atlassian account email">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label" for="repository-credentials-token">Token</label>
+                                                    <input type="text" id="repository-credentials-token" name="token"
+                                                           class="form-input" placeholder="Bitbucket API token">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div id="token-auth-fields" class="hidden animate-fadeIn" style="display:none;">
-                                            <div class="form-group">
-                                                <label class="form-label"
-                                                       for="repository-credentials-token">Token</label>
-                                                <input type="text" id="repository-credentials-token" name="token"
-                                                       class="form-input" placeholder="Enter authentication token">
+                                            <div id="auth-token-fields" class="hidden animate-fadeIn">
+                                                <div class="form-group">
+                                                    <label class="form-label" for="repository-credentials-token-at">Token</label>
+                                                    <input type="text" id="repository-credentials-token-at" name="token"
+                                                           class="form-input" placeholder="Bearer token (OAuth / PAT)">
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="form-group mt-4">
@@ -1450,22 +1487,52 @@
         }
     }
 
+    function updateTabVisibility() {
+        const cascadeEnabled = document.getElementById("cascade-merge-enabled")?.checked ?? false;
+        const telegramEnabled = document.getElementById("telegram-notifications-enabled")?.checked ?? false;
+        const branchMappingsLi = document.getElementById("branch-mappings-tab-li");
+        const notificationsLi = document.getElementById("notifications-tab-li");
+        const branchMappingsContent = document.getElementById("branch-mappings-content");
+        const notificationsContent = document.getElementById("notifications-content");
+        if (branchMappingsLi) branchMappingsLi.classList.toggle("hidden", !cascadeEnabled);
+        if (notificationsLi) notificationsLi.classList.toggle("hidden", !telegramEnabled);
+        // Only hide content when feature disabled; when enabled, tab switching controls visibility
+        if (branchMappingsContent && !cascadeEnabled) branchMappingsContent.classList.add("hidden");
+        if (notificationsContent && !telegramEnabled) notificationsContent.classList.add("hidden");
+        // If current tab is hidden, switch to general
+        const currentTabContent = document.querySelector(".repo-tab-content.active");
+        if (currentTabContent?.classList.contains("hidden")) {
+            switchToRepositoryTab("general-content");
+            lastSelectedTabId = "general-content";
+        }
+    }
+
     function renderEditRepositoryBlock() {
         // Populate repository fields
         document.getElementById("repository-name").value = selectedRepository.name;
         document.getElementById("repository-merge-strategy").value = selectedRepository.mergeStrategy;
+        document.getElementById("cascade-merge-enabled").checked = selectedRepository.cascadeMergeEnabled === true;
+        document.getElementById("telegram-notifications-enabled").checked = selectedRepository.telegramNotificationsEnabled === true;
         document.getElementById("repository-telegram-bot-token").value = selectedRepository.telegramBotToken || "";
         document.getElementById("repository-telegram-chat-id").value = selectedRepository.telegramChatId || "";
 
-        // Initialize tabs - use last selected tab
-        switchToRepositoryTab(lastSelectedTabId);
+        // Show/hide tabs based on feature switches, then switch to appropriate tab
+        updateTabVisibility();
+        const targetTabLi = document.querySelector(`.repo-tab-btn[data-tab="${lastSelectedTabId}"]`)?.closest("li");
+        const targetTab = targetTabLi?.classList.contains("hidden") ? "general-content" : lastSelectedTabId;
+        lastSelectedTabId = targetTab;
+        switchToRepositoryTab(targetTab);
+        updateTabVisibility(); // Reapply feature-based hiding after switchToRepositoryTab
 
         // Populate repository credentials
         const credentials = selectedRepository.repositoryCredentials;
-        document.getElementById("repository-credentials-auth-type").value = credentials?.authType || 0;
+        const authType = credentials?.authType ?? 0;
+        document.getElementById("repository-credentials-auth-type").value = authType;
         document.getElementById("repository-credentials-username").value = credentials?.username || "";
         document.getElementById("repository-credentials-password").value = credentials?.password || "";
+        document.getElementById("repository-credentials-email").value = credentials?.email || credentials?.username || "";
         document.getElementById("repository-credentials-token").value = credentials?.token || "";
+        document.getElementById("repository-credentials-token-at").value = credentials?.token || "";
         document.getElementById("repository-webhook-secret").value = selectedRepository.webhookSecret || "";
 
         // Toggle credentials fields based on auth type
@@ -1572,19 +1639,26 @@
 
     function toggleCredentialsFields() {
         const authType = document.getElementById("repository-credentials-auth-type").value;
-        const basicAuthFields = document.getElementById("basic-auth-fields");
-        const tokenAuthFields = document.getElementById("token-auth-fields");
+        const basicPasswordFields = document.getElementById("basic-password-fields");
+        const basicTokenFields = document.getElementById("basic-token-fields");
+        const authTokenFields = document.getElementById("auth-token-fields");
 
-        if (authType === "0") { // Basic
-            basicAuthFields.classList.remove("hidden");
-            basicAuthFields.style.display = "grid";
-            tokenAuthFields.classList.add("hidden");
-            tokenAuthFields.style.display = "none";
+        basicPasswordFields.classList.add("hidden");
+        basicPasswordFields.style.display = "none";
+        basicTokenFields.classList.add("hidden");
+        basicTokenFields.style.display = "none";
+        authTokenFields.classList.add("hidden");
+        authTokenFields.style.display = "none";
+
+        if (authType === "0") { // BasicPasswordAuth
+            basicPasswordFields.classList.remove("hidden");
+            basicPasswordFields.style.display = "grid";
+        } else if (authType === "1") { // BasicTokenAuth
+            basicTokenFields.classList.remove("hidden");
+            basicTokenFields.style.display = "grid";
         } else { // AuthToken
-            basicAuthFields.classList.add("hidden");
-            basicAuthFields.style.display = "none";
-            tokenAuthFields.classList.remove("hidden");
-            tokenAuthFields.style.display = "grid";
+            authTokenFields.classList.remove("hidden");
+            authTokenFields.style.display = "block";
         }
     }
 
@@ -1627,15 +1701,37 @@
         const repositoryData = {
             name: document.getElementById("repository-name").value,
             mergeStrategy: document.getElementById("repository-merge-strategy").value,
+            cascadeMergeEnabled: document.getElementById("cascade-merge-enabled").checked,
+            telegramNotificationsEnabled: document.getElementById("telegram-notifications-enabled").checked,
             telegramBotToken: document.getElementById("repository-telegram-bot-token").value,
             telegramChatId: document.getElementById("repository-telegram-chat-id").value,
             webhookSecret: document.getElementById("repository-webhook-secret").value || null,
-            repositoryCredentials: {
-                authType: parseInt(document.getElementById("repository-credentials-auth-type").value),
-                username: document.getElementById("repository-credentials-username").value,
-                password: document.getElementById("repository-credentials-password").value,
-                token: document.getElementById("repository-credentials-token").value,
-            },
+            repositoryCredentials: (function() {
+                const authType = parseInt(document.getElementById("repository-credentials-auth-type").value);
+                if (authType === 0) { // BasicPasswordAuth
+                    return {
+                        authType: 0,
+                        username: document.getElementById("repository-credentials-username").value,
+                        password: document.getElementById("repository-credentials-password").value,
+                        token: ""
+                    };
+                }
+                if (authType === 1) { // BasicTokenAuth
+                    return {
+                        authType: 1,
+                        username: "",
+                        password: "",
+                        email: document.getElementById("repository-credentials-email").value,
+                        token: document.getElementById("repository-credentials-token").value
+                    };
+                }
+                return {
+                    authType: 2,
+                    username: "",
+                    password: "",
+                    token: document.getElementById("repository-credentials-token-at").value
+                };
+            })(),
             branchMappings: branchMappings,
             repositoryNotificationSettings: {
                 eventType: parseInt(document.getElementById("repository-notification-settings-event-types").value),
@@ -1853,6 +1949,8 @@
                 name: repositoryName,
                 mergeStrategy: mergeStrategy,
                 projectId: projectId,
+                cascadeMergeEnabled: false,
+                telegramNotificationsEnabled: false,
                 repositoryNotificationSettings: {
                     eventType: 0
                 }

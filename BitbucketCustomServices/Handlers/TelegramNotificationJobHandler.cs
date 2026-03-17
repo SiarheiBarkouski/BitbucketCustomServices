@@ -15,7 +15,9 @@ public class TelegramNotificationJobHandler : IWebhookJobHandler
         _scopeFactory = scopeFactory;
     }
 
-    public bool CanHandle(WebhookJob job) => job.EventType is not EventType.Default;
+    public bool CanHandle(WebhookJob job) =>
+        job.EventType is not EventType.Default &&
+        job.Repository != null && job.Repository.TelegramNotificationsEnabled;
 
     public async Task HandleAsync(WebhookJob job, CancellationToken cancellationToken = default)
     {

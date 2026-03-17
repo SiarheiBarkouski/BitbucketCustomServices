@@ -28,8 +28,10 @@ public sealed class BitbucketService : IBitbucketService
 
         httpClient.DefaultRequestHeaders.Authorization = credentials.AuthType switch
         {
-            AuthType.Basic => new("Basic", Convert.ToBase64String(
+            AuthType.BasicPasswordAuth => new("Basic", Convert.ToBase64String(
                 Encoding.UTF8.GetBytes($"{credentials.Username?.Trim() ?? ""}:{credentials.Password?.Trim() ?? ""}"))),
+            AuthType.BasicTokenAuth => new("Basic", Convert.ToBase64String(
+                Encoding.UTF8.GetBytes($"{credentials.Email?.Trim() ?? ""}:{credentials.Token?.Trim() ?? ""}"))),
             AuthType.AuthToken => new("Bearer", credentials.Token?.Trim() ?? ""),
             _ => throw new ArgumentOutOfRangeException(nameof(credentials.AuthType),
                 $"Unknown auth type: {credentials.AuthType}")

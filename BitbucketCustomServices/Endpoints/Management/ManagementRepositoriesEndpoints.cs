@@ -140,6 +140,8 @@ public static class ManagementRepositoriesEndpoints
 
             repository.Name = updatedRepository.Name;
             repository.MergeStrategy = updatedRepository.MergeStrategy;
+            repository.CascadeMergeEnabled = updatedRepository.CascadeMergeEnabled;
+            repository.TelegramNotificationsEnabled = updatedRepository.TelegramNotificationsEnabled;
             repository.TelegramBotToken = updatedRepository.TelegramBotToken;
             repository.TelegramChatId = updatedRepository.TelegramChatId;
             repository.WebhookSecret = updatedRepository.WebhookSecret;
@@ -154,6 +156,7 @@ public static class ManagementRepositoriesEndpoints
                 repository.RepositoryCredentials.AuthType = updatedRepository.RepositoryCredentials.AuthType;
                 repository.RepositoryCredentials.Username = updatedRepository.RepositoryCredentials.Username;
                 repository.RepositoryCredentials.Password = updatedRepository.RepositoryCredentials.Password;
+                repository.RepositoryCredentials.Email = updatedRepository.RepositoryCredentials.Email;
                 repository.RepositoryCredentials.Token = updatedRepository.RepositoryCredentials.Token;
             }
 

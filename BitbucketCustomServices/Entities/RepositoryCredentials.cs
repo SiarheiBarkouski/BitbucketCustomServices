@@ -1,4 +1,4 @@
-﻿using BitbucketCustomServices.Enums;
+using BitbucketCustomServices.Enums;
 
 namespace BitbucketCustomServices.Entities;
 
@@ -10,6 +10,8 @@ public class RepositoryCredentials
 
     public string Password { get; set; }
 
+    public string Email { get; set; }
+
     public string Token { get; set; }
 
     public AuthType AuthType { get; set; }
@@ -18,20 +20,26 @@ public class RepositoryCredentials
 
     public (bool, string) Validate()
     {
-        if (AuthType == AuthType.Basic)
+        if (AuthType == AuthType.BasicPasswordAuth)
         {
             if (string.IsNullOrEmpty(Username))
-                return (false, "Username is required for Basic auth");
-            
+                return (false, "Username is required for Basic Password auth");
             if (string.IsNullOrEmpty(Password))
-                return (false,"Password is required for Basic auth");
+                return (false, "Password is required for Basic Password auth");
+        }
+        else if (AuthType == AuthType.BasicTokenAuth)
+        {
+            if (string.IsNullOrEmpty(Email))
+                return (false, "Email is required for Basic Token auth");
+            if (string.IsNullOrEmpty(Token))
+                return (false, "Token is required for Basic Token auth");
         }
         else if (AuthType == AuthType.AuthToken)
         {
             if (string.IsNullOrEmpty(Token))
-                return (false, "Token is required for AuthToken auth");
+                return (false, "Token is required for Auth Token auth");
         }
-        
+
         return (true, null);
     }
 }

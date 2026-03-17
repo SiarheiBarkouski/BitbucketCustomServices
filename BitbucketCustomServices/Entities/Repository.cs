@@ -6,6 +6,10 @@ public class Repository : EntityAutoIdentifier
     
     public string MergeStrategy { get; set; }
     
+    public bool CascadeMergeEnabled { get; set; } = false;
+    
+    public bool TelegramNotificationsEnabled { get; set; } = false;
+    
     public string TelegramBotToken { get; set; }
     
     public string TelegramChatId { get; set; }

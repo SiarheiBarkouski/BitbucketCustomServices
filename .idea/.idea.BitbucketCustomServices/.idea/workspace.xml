@@ -26,7 +26,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/e6818e2558924917914b68da3daa7cc98b13d41cf7cce4682899a8a8569375/ReaderModificationCommandBatch.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Endpoints/Management/ManagementRepositoriesEndpoints.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Endpoints/Webhooks/WebhookEndpoint.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Entities/Repository.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Entities/Repository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Entities/RepositoryCredentials.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/CascadeMergeJobHandler.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/TelegramNotificationJobHandler.cs" root0="SKIP_HIGHLIGHTING" />
@@ -55,28 +55,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Project.BitbucketCustomServices.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/TestProjects/BitbucketCustomServices/kubernetes.yaml&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Project.BitbucketCustomServices.executor": "Debug",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "E:/TestProjects/BitbucketCustomServices/kubernetes.yaml",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlite&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Project.BitbucketCustomServices">
     <configuration name="BitbucketCustomServices" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
@@ -152,6 +153,7 @@
       <workItem from="1768470155547" duration="14866000" />
       <workItem from="1773650107780" duration="6722000" />
       <workItem from="1773658122483" duration="2988000" />
+      <workItem from="1773663019587" duration="3727000" />
     </task>
     <servers />
   </component>
@@ -203,39 +205,39 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/BitbucketCustomServices/Services/BitbucketService.cs</url>
-          <line>55</line>
+          <line>57</line>
           <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Services\BitbucketService.cs" containingFunctionPresentation="Method 'CreatePullRequest'">
             <startOffsets>
-              <option value="2148" />
+              <option value="2350" />
             </startOffsets>
             <endOffsets>
-              <option value="2212" />
+              <option value="2414" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/TelegramNotificationJobHandler.cs</url>
-          <line>39</line>
+          <line>41</line>
           <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Handlers\TelegramNotificationJobHandler.cs" containingFunctionPresentation="Method 'HandleAsync'">
             <startOffsets>
-              <option value="1653" />
+              <option value="1742" />
             </startOffsets>
             <endOffsets>
-              <option value="1695" />
+              <option value="1784" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/BitbucketCustomServices/Handlers/CascadeMergeJobHandler.cs</url>
-          <line>22</line>
+          <line>23</line>
           <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Handlers\CascadeMergeJobHandler.cs" containingFunctionPresentation="Method 'HandleAsync'">
             <startOffsets>
-              <option value="762" />
+              <option value="834" />
             </startOffsets>
             <endOffsets>
-              <option value="808" />
+              <option value="880" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="10" />
@@ -252,19 +254,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="11" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/BitbucketCustomServices/Program.cs</url>
-          <line>122</line>
-          <properties documentPath="E:\TestProjects\BitbucketCustomServices\BitbucketCustomServices\Program.cs" containingFunctionPresentation="">
-            <startOffsets>
-              <option value="4686" />
-            </startOffsets>
-            <endOffsets>
-              <option value="4759" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

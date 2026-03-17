@@ -12,7 +12,7 @@ namespace BitbucketCustomServices.Tests;
 
 public class TelegramNotificationJobHandlerTests
 {
-    private static WebhookJob CreateJob(EventType eventType)
+    private static WebhookJob CreateJob(EventType eventType, Entities.Repository? repository = null)
     {
         var dest = new Destination(
             new Models.Repository("ws/repo"),
@@ -24,16 +24,26 @@ public class TelegramNotificationJobHandlerTests
             new Commit("h", DateTime.UtcNow, "m", new Author("a", "a", null!)));
         var pr = new PullRequest(dest, src, new Author("a", "a", null!), "Title", "", 1, [], []);
         var evt = new PullRequestEvent(new Actor("a"), pr, new Changes(new CommitChanges([]), new DiffChanges(null, null)));
-        return new WebhookJob("ws", "repo", evt, eventType);
+        return new WebhookJob("ws", "repo", evt, eventType, repository);
     }
 
     [Fact]
-    public void CanHandle_WhenEventTypeNotDefault_ReturnsTrue()
+    public void CanHandle_WhenEventTypeNotDefaultAndTelegramEnabled_ReturnsTrue()
+    {
+        var repo = new Entities.Repository { TelegramNotificationsEnabled = true };
+        var sp = new ServiceCollection().BuildServiceProvider();
+        var handler = new TelegramNotificationJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var job = CreateJob(EventType.PullRequestMerged, repo);
+        Assert.True(handler.CanHandle(job));
+    }
+
+    [Fact]
+    public void CanHandle_WhenRepositoryNull_ReturnsFalse()
     {
         var sp = new ServiceCollection().BuildServiceProvider();
         var handler = new TelegramNotificationJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
-        var job = CreateJob(EventType.PullRequestMerged);
-        Assert.True(handler.CanHandle(job));
+        var job = CreateJob(EventType.PullRequestMerged, null);
+        Assert.False(handler.CanHandle(job));
     }
 
     [Fact]
@@ -43,6 +53,26 @@ public class TelegramNotificationJobHandlerTests
         var handler = new TelegramNotificationJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
         var job = CreateJob(EventType.Default);
         Assert.False(handler.CanHandle(job));
+    }
+
+    [Fact]
+    public void CanHandle_WhenTelegramNotificationsDisabled_ReturnsFalse()
+    {
+        var repo = new Entities.Repository { TelegramNotificationsEnabled = false };
+        var sp = new ServiceCollection().BuildServiceProvider();
+        var handler = new TelegramNotificationJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var job = CreateJob(EventType.PullRequestMerged, repo);
+        Assert.False(handler.CanHandle(job));
+    }
+
+    [Fact]
+    public void CanHandle_WhenTelegramNotificationsEnabled_ReturnsTrue()
+    {
+        var repo = new Entities.Repository { TelegramNotificationsEnabled = true };
+        var sp = new ServiceCollection().BuildServiceProvider();
+        var handler = new TelegramNotificationJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var job = CreateJob(EventType.PullRequestMerged, repo);
+        Assert.True(handler.CanHandle(job));
     }
 
     [Fact]

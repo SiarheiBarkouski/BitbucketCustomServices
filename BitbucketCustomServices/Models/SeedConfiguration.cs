@@ -25,15 +25,23 @@ public class SeedRepositoryConfiguration
 {
     public string Name { get; set; } = string.Empty;
     public string MergeStrategy { get; set; } = "merge_commit";
+    /// <summary>When true, cascade merge is enabled. If omitted, defaults to false.</summary>
+    public bool? CascadeMergeEnabled { get; set; }
+    /// <summary>When true, Telegram notifications are enabled. If omitted, defaults to false.</summary>
+    public bool? TelegramNotificationsEnabled { get; set; }
     public string? TelegramBotToken { get; set; }
     public string? TelegramChatId { get; set; }
-    /// <summary>Bitbucket API token (AuthToken auth). Ignored when UserEmail and UserToken are both set.</summary>
+    /// <summary>Bitbucket API token (AuthToken auth).</summary>
     public string? BitbucketToken { get; set; }
-    /// <summary>Bitbucket email for Basic auth. Use with UserToken for Basic auth instead of BitbucketToken.</summary>
+    /// <summary>Username for BasicPasswordAuth. Use with Password.</summary>
+    public string? UserName { get; set; }
+    /// <summary>Password for BasicPasswordAuth. Use with UserName.</summary>
+    public string? Password { get; set; }
+    /// <summary>Email for BasicTokenAuth. Use with UserToken.</summary>
     public string? UserEmail { get; set; }
-    /// <summary>Bitbucket API token for Basic auth. Use with UserEmail for Basic auth instead of BitbucketToken.</summary>
+    /// <summary>API token for BasicTokenAuth. Use with UserEmail.</summary>
     public string? UserToken { get; set; }
-    /// <summary>Auth type: "Basic" or "AuthToken". If omitted, inferred from UserEmail+UserToken (Basic) or BitbucketToken (AuthToken).</summary>
+    /// <summary>Auth type: "BasicPasswordAuth", "BasicTokenAuth", or "AuthToken". If omitted, inferred from credentials.</summary>
     public string? AuthType { get; set; }
     /// <summary>Webhook secret for X-Hub-Signature verification. Leave empty to skip verification.</summary>
     public string? WebhookSecret { get; set; }

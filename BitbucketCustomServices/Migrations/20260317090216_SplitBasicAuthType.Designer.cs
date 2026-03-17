@@ -3,6 +3,7 @@ using System;
 using BitbucketCustomServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BitbucketCustomServices.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260317090216_SplitBasicAuthType")]
+    partial class SplitBasicAuthType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -64,9 +67,6 @@ namespace BitbucketCustomServices.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("CascadeMergeEnabled")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("MergeStrategy")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -83,9 +83,6 @@ namespace BitbucketCustomServices.Migrations
 
                     b.Property<string>("TelegramChatId")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("TelegramNotificationsEnabled")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("WebhookSecret")
                         .HasColumnType("TEXT");
@@ -107,9 +104,6 @@ namespace BitbucketCustomServices.Migrations
 
                     b.Property<int>("AuthType")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
                         .HasColumnType("TEXT");

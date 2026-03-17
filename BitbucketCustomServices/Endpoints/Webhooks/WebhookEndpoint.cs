@@ -73,7 +73,7 @@ public static class WebhookEndpoint
                     return;
                 }
 
-                var job = new WebhookJob(workspace, repoSlug, prEvent, eventType);
+                var job = new WebhookJob(workspace, repoSlug, prEvent, eventType, repository);
                 await channel.WriteAsync(job);
 
                 logger.LogDebug("Webhook job enqueued for {Workspace}/{RepoSlug}, EventType: {EventType}",

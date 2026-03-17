@@ -11,7 +11,7 @@ namespace BitbucketCustomServices.Tests;
 public class BitbucketServiceTests
 {
     [Fact]
-    public async Task GetAuthenticatedClient_WhenBasicAuth_SetsCorrectHeader()
+    public async Task GetAuthenticatedClient_WhenBasicPasswordAuth_SetsUsernamePasswordBasicHeader()
     {
         var services = new ServiceCollection();
         services.AddHttpClient();
@@ -22,7 +22,7 @@ public class BitbucketServiceTests
         var service = new BitbucketService(factory, logger.Object);
         var creds = new RepositoryCredentials
         {
-            AuthType = AuthType.Basic,
+            AuthType = AuthType.BasicPasswordAuth,
             Username = "user@example.com",
             Password = "mytoken"
         };
@@ -32,6 +32,31 @@ public class BitbucketServiceTests
         Assert.NotNull(client.DefaultRequestHeaders.Authorization);
         Assert.Equal("Basic", client.DefaultRequestHeaders.Authorization.Scheme);
         var expected = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("user@example.com:mytoken"));
+        Assert.Equal(expected, client.DefaultRequestHeaders.Authorization.Parameter);
+    }
+
+    [Fact]
+    public async Task GetAuthenticatedClient_WhenBasicTokenAuth_UsesEmailAndTokenForBasicHeader()
+    {
+        var services = new ServiceCollection();
+        services.AddHttpClient();
+        var sp = services.BuildServiceProvider();
+        var factory = sp.GetRequiredService<IHttpClientFactory>();
+        var logger = new Mock<ILogger<BitbucketService>>();
+
+        var service = new BitbucketService(factory, logger.Object);
+        var creds = new RepositoryCredentials
+        {
+            AuthType = AuthType.BasicTokenAuth,
+            Email = "user@atlassian.com",
+            Token = "ATATT3xAppPassword"
+        };
+
+        var client = await service.GetAuthenticatedClient(creds);
+
+        Assert.NotNull(client.DefaultRequestHeaders.Authorization);
+        Assert.Equal("Basic", client.DefaultRequestHeaders.Authorization.Scheme);
+        var expected = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("user@atlassian.com:ATATT3xAppPassword"));
         Assert.Equal(expected, client.DefaultRequestHeaders.Authorization.Parameter);
     }
 

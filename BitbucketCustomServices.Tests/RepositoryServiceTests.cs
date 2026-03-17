@@ -38,7 +38,7 @@ public class RepositoryServiceTests
             Name = "test",
             RepositoryCredentials = new RepositoryCredentials
             {
-                AuthType = AuthType.Basic,
+                AuthType = AuthType.BasicPasswordAuth,
                 Username = "user@example.com",
                 Password = "token"
             }
@@ -55,7 +55,7 @@ public class RepositoryServiceTests
             Name = "test",
             RepositoryCredentials = new RepositoryCredentials
             {
-                AuthType = AuthType.Basic,
+                AuthType = AuthType.BasicPasswordAuth,
                 Username = "",
                 Password = "token"
             }

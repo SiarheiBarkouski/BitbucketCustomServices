@@ -29,14 +29,25 @@ public class SeedConfigHelperTests
     }
 
     [Fact]
-    public void ResolveAuthType_WhenUserEmailAndUserTokenSet_ReturnsBasic()
+    public void ResolveAuthType_WhenUserEmailAndUserTokenSet_ReturnsBasicTokenAuth()
     {
         var config = new SeedRepositoryConfiguration
         {
             UserEmail = "user@example.com",
             UserToken = "token123"
         };
-        Assert.Equal(AuthType.Basic, SeedConfigHelper.ResolveAuthType(config));
+        Assert.Equal(AuthType.BasicTokenAuth, SeedConfigHelper.ResolveAuthType(config));
+    }
+
+    [Fact]
+    public void ResolveAuthType_WhenUserNameAndPasswordSet_ReturnsBasicPasswordAuth()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            UserName = "myuser",
+            Password = "mypassword"
+        };
+        Assert.Equal(AuthType.BasicPasswordAuth, SeedConfigHelper.ResolveAuthType(config));
     }
 
     [Fact]
@@ -50,15 +61,15 @@ public class SeedConfigHelperTests
     }
 
     [Fact]
-    public void ResolveAuthType_WhenAuthTypeExplicitlyBasicAndCredsSet_ReturnsBasic()
+    public void ResolveAuthType_WhenAuthTypeExplicitlyBasicTokenAuthAndCredsSet_ReturnsBasicTokenAuth()
     {
         var config = new SeedRepositoryConfiguration
         {
-            AuthType = "Basic",
+            AuthType = "BasicTokenAuth",
             UserEmail = "user@example.com",
             UserToken = "token123"
         };
-        Assert.Equal(AuthType.Basic, SeedConfigHelper.ResolveAuthType(config));
+        Assert.Equal(AuthType.BasicTokenAuth, SeedConfigHelper.ResolveAuthType(config));
     }
 
     [Fact]
@@ -73,11 +84,11 @@ public class SeedConfigHelperTests
     }
 
     [Fact]
-    public void ResolveAuthType_WhenAuthTypeBasicButNoCreds_ReturnsAuthToken()
+    public void ResolveAuthType_WhenAuthTypeBasicTokenAuthButNoCreds_ReturnsAuthToken()
     {
         var config = new SeedRepositoryConfiguration
         {
-            AuthType = "Basic",
+            AuthType = "BasicTokenAuth",
             BitbucketToken = "ATCTT3x..."
         };
         Assert.Equal(AuthType.AuthToken, SeedConfigHelper.ResolveAuthType(config));

@@ -14,7 +14,7 @@ public class CascadeMergeJobHandlerTests
 {
     private static readonly Changes EmptyChanges = new(new CommitChanges([]), new DiffChanges(null, null));
 
-    private static WebhookJob CreateJob(EventType eventType, string? destBranchName = "main")
+    private static WebhookJob CreateJob(EventType eventType, string? destBranchName = "main", Entities.Repository? repository = null)
     {
         var destBranch = destBranchName != null ? new Branch(destBranchName) : null!;
         var dest = new Destination(
@@ -28,16 +28,26 @@ public class CascadeMergeJobHandlerTests
         var pr = new PullRequest(
             dest, src, new Author("a", "a", null!), "Title", "", 1, [], []);
         var evt = new PullRequestEvent(new Actor("a"), pr, EmptyChanges);
-        return new WebhookJob("ws", "repo", evt, eventType);
+        return new WebhookJob("ws", "repo", evt, eventType, repository);
     }
 
     [Fact]
-    public void CanHandle_WhenPullRequestMergedAndDestBranchSet_ReturnsTrue()
+    public void CanHandle_WhenPullRequestMergedAndDestBranchSetAndCascadeEnabled_ReturnsTrue()
+    {
+        var repo = new Entities.Repository { CascadeMergeEnabled = true };
+        var sp = new ServiceCollection().BuildServiceProvider();
+        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var job = CreateJob(EventType.PullRequestMerged, "main", repo);
+        Assert.True(handler.CanHandle(job));
+    }
+
+    [Fact]
+    public void CanHandle_WhenRepositoryNull_ReturnsFalse()
     {
         var sp = new ServiceCollection().BuildServiceProvider();
         var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
-        var job = CreateJob(EventType.PullRequestMerged, "main");
-        Assert.True(handler.CanHandle(job));
+        var job = CreateJob(EventType.PullRequestMerged, "main", null);
+        Assert.False(handler.CanHandle(job));
     }
 
     [Fact]
@@ -65,6 +75,26 @@ public class CascadeMergeJobHandlerTests
         var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
         var job = CreateJob(EventType.PullRequestMerged, null);
         Assert.False(handler.CanHandle(job));
+    }
+
+    [Fact]
+    public void CanHandle_WhenCascadeMergeDisabled_ReturnsFalse()
+    {
+        var repo = new Entities.Repository { CascadeMergeEnabled = false };
+        var sp = new ServiceCollection().BuildServiceProvider();
+        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var job = CreateJob(EventType.PullRequestMerged, "main", repo);
+        Assert.False(handler.CanHandle(job));
+    }
+
+    [Fact]
+    public void CanHandle_WhenCascadeMergeEnabled_ReturnsTrue()
+    {
+        var repo = new Entities.Repository { CascadeMergeEnabled = true };
+        var sp = new ServiceCollection().BuildServiceProvider();
+        var handler = new CascadeMergeJobHandler(sp.GetRequiredService<IServiceScopeFactory>());
+        var job = CreateJob(EventType.PullRequestMerged, "main", repo);
+        Assert.True(handler.CanHandle(job));
     }
 
     [Fact]

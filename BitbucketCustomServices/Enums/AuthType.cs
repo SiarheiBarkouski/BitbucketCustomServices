@@ -1,7 +1,8 @@
-﻿namespace BitbucketCustomServices.Enums;
+namespace BitbucketCustomServices.Enums;
 
 public enum AuthType
 {
-    Basic,
+    BasicPasswordAuth,
+    BasicTokenAuth,
     AuthToken
 }

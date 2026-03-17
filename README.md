@@ -117,9 +117,11 @@ The application uses `seed-config.json` to initialize the database with users, p
    - Replace `YOUR_TELEGRAM_BOT_TOKEN` with your Telegram bot token
    - Replace `YOUR_TELEGRAM_CHAT_ID` with your Telegram chat ID
    - **Bitbucket auth** (choose one per repository):
-     - `BitbucketToken`: API token (AuthToken auth)
-     - `UserEmail` + `UserToken`: Atlassian email and API token (Basic auth for Bitbucket Cloud)
-     - `AuthType`: optional `"Basic"` or `"AuthToken"` to set explicitly; otherwise inferred from credentials
+     - `BasicPasswordAuth`: `UserName` + `Password` (username and password)
+     - `BasicTokenAuth`: `UserEmail` + `UserToken` (Atlassian email and API token for Bitbucket Cloud)
+     - `AuthToken`: `BitbucketToken` (Bearer token)
+     - `AuthType`: optional `"BasicPasswordAuth"`, `"BasicTokenAuth"`, or `"AuthToken"` to set explicitly; otherwise inferred from credentials
+   - **Feature flags** (optional, default: false when omitted): `CascadeMergeEnabled` and `TelegramNotificationsEnabled` enable cascade merge and Telegram notifications per repository
    - Update user credentials (username, email, password, role)
    - Configure projects, repositories, and branch mappings
 
@@ -166,6 +168,8 @@ The configuration file uses a simple, flat structure:
         {
           "Name": "main-repo",
           "MergeStrategy": "merge_commit",
+          "CascadeMergeEnabled": true,
+          "TelegramNotificationsEnabled": true,
           "TelegramBotToken": "YOUR_TELEGRAM_BOT_TOKEN",
           "TelegramChatId": "YOUR_TELEGRAM_CHAT_ID",
           "BitbucketToken": "YOUR_BITBUCKET_TOKEN",
@@ -207,9 +211,13 @@ Each project object contains:
 Each repository object contains:
 - **Name** (required): The repository name
 - **MergeStrategy** (optional, default: "merge_commit"): One of `merge_commit`, `squash`, or `fast_forward`
+- **CascadeMergeEnabled** (optional, default: false): When true, enables cascade merge for this repository
+- **TelegramNotificationsEnabled** (optional, default: false): When true, enables Telegram notifications for this repository
 - **TelegramBotToken** (optional): Telegram bot token for notifications
 - **TelegramChatId** (optional): Telegram chat ID for notifications
-- **BitbucketToken** (optional): Bitbucket API token for repository access
+- **Bitbucket auth** (choose one): `BitbucketToken` (AuthToken), or `UserName`+`Password` (BasicPasswordAuth), or `UserEmail`+`UserToken` (BasicTokenAuth)
+- **AuthType** (optional): `"BasicPasswordAuth"`, `"BasicTokenAuth"`, or `"AuthToken"`; inferred from credentials if omitted
+- **WebhookSecret** (optional): Secret for X-Hub-Signature verification
 - **BranchMappings** (optional): Array of branch mapping objects
   - **From**: Source branch name
   - **To**: Target branch name
@@ -219,6 +227,7 @@ Each repository object contains:
 
 **Notes:**
 - Optional fields can be set to `null` or omitted entirely
+- When `CascadeMergeEnabled` or `TelegramNotificationsEnabled` are omitted, the feature is **disabled** for that repository
 - `UserNames` should reference usernames from users defined in the `Users` array
 - If `UserNames` is empty or null, only Admin and Moderator roles will have access (they have automatic access to all repositories)
 
@@ -311,17 +320,17 @@ Each repository object contains:
 
 Configure **one webhook URL per repository** in Bitbucket: `https://your-host:7799/webhook`
 
-The single `/webhook` endpoint handles all events (cascade merge, Telegram notifications). Events are routed internally by type. Optionally set a Webhook Secret in the repository Auth tab to verify `X-Hub-Signature`.
+The single `/webhook` endpoint handles all events (cascade merge, Telegram notifications). Events are routed internally by type. Cascade merge and Telegram notifications only run when the corresponding feature is enabled for the repository (General tab). Optionally set a Webhook Secret in the repository Auth tab to verify `X-Hub-Signature`.
 
 ### Managing Repositories
 
 1. Go to the **Projects** tab
 2. Select a project to view its repositories
 3. Click on a repository to view and edit its settings:
-   - Merge strategy
-   - Branch mappings (cascade merge configuration)
-   - Telegram notification settings
-   - Bitbucket authentication (including optional webhook secret)
+   - **General**: Repository name, merge strategy, and feature switches (Cascade merge, Telegram notifications). When a feature is disabled, its tab is hidden.
+   - **Authentication**: Bitbucket credentials and optional webhook secret
+   - **Branch mappings** (Cascade merge tab): Configure cascade merge targets; visible only when Cascade merge is enabled
+   - **Telegram Notifications** tab: Bot token, chat ID, and event types; visible only when Telegram notifications are enabled
 
 ### Managing Users
 

@@ -16,7 +16,8 @@ public class CascadeMergeJobHandler : IWebhookJobHandler
 
     public bool CanHandle(WebhookJob job) =>
         job.EventType is EventType.PullRequestMerged &&
-        !string.IsNullOrEmpty(job.PullRequestEvent.PullRequest?.Destination?.Branch?.Name);
+        !string.IsNullOrEmpty(job.PullRequestEvent.PullRequest?.Destination?.Branch?.Name) &&
+        job.Repository != null && job.Repository.CascadeMergeEnabled;
 
     public async Task HandleAsync(WebhookJob job, CancellationToken cancellationToken = default)
     {

@@ -38,6 +38,8 @@
         {
           "Name": "main-repo",
           "MergeStrategy": "merge_commit",
+          "CascadeMergeEnabled": true,
+          "TelegramNotificationsEnabled": true,
           "TelegramBotToken": "YOUR_TELEGRAM_BOT_TOKEN",
           "TelegramChatId": "YOUR_TELEGRAM_CHAT_ID",
           "BitbucketToken": "YOUR_BITBUCKET_TOKEN",
@@ -52,9 +54,11 @@
         {
           "Name": "api-repo",
           "MergeStrategy": "squash",
+          "CascadeMergeEnabled": true,
+          "TelegramNotificationsEnabled": true,
           "TelegramBotToken": "YOUR_TELEGRAM_BOT_TOKEN",
           "TelegramChatId": "YOUR_TELEGRAM_CHAT_ID",
-          "AuthType": "Basic",
+          "AuthType": "BasicTokenAuth",
           "UserEmail": "your-email@atlassian.com",
           "UserToken": "YOUR_BITBUCKET_API_TOKEN",
           "WebhookSecret": "YOUR_WEBHOOK_SECRET",

@@ -7,11 +7,11 @@ namespace BitbucketCustomServices.Tests;
 public class RepositoryCredentialsTests
 {
     [Fact]
-    public void Validate_BasicAuth_WhenUsernameEmpty_ReturnsFalse()
+    public void Validate_BasicPasswordAuth_WhenUsernameEmpty_ReturnsFalse()
     {
         var creds = new RepositoryCredentials
         {
-            AuthType = AuthType.Basic,
+            AuthType = AuthType.BasicPasswordAuth,
             Username = "",
             Password = "token123"
         };
@@ -21,11 +21,11 @@ public class RepositoryCredentialsTests
     }
 
     [Fact]
-    public void Validate_BasicAuth_WhenPasswordEmpty_ReturnsFalse()
+    public void Validate_BasicPasswordAuth_WhenPasswordEmpty_ReturnsFalse()
     {
         var creds = new RepositoryCredentials
         {
-            AuthType = AuthType.Basic,
+            AuthType = AuthType.BasicPasswordAuth,
             Username = "user@example.com",
             Password = ""
         };
@@ -35,11 +35,11 @@ public class RepositoryCredentialsTests
     }
 
     [Fact]
-    public void Validate_BasicAuth_WhenBothSet_ReturnsTrue()
+    public void Validate_BasicPasswordAuth_WhenBothSet_ReturnsTrue()
     {
         var creds = new RepositoryCredentials
         {
-            AuthType = AuthType.Basic,
+            AuthType = AuthType.BasicPasswordAuth,
             Username = "user@example.com",
             Password = "token123"
         };
@@ -67,6 +67,47 @@ public class RepositoryCredentialsTests
         {
             AuthType = AuthType.AuthToken,
             Token = "ATCTT3x..."
+        };
+        var (valid, _) = creds.Validate();
+        Assert.True(valid);
+    }
+
+    [Fact]
+    public void Validate_BasicTokenAuth_WhenEmailEmpty_ReturnsFalse()
+    {
+        var creds = new RepositoryCredentials
+        {
+            AuthType = AuthType.BasicTokenAuth,
+            Email = "",
+            Token = "token123"
+        };
+        var (valid, message) = creds.Validate();
+        Assert.False(valid);
+        Assert.Contains("Email", message!);
+    }
+
+    [Fact]
+    public void Validate_BasicTokenAuth_WhenTokenEmpty_ReturnsFalse()
+    {
+        var creds = new RepositoryCredentials
+        {
+            AuthType = AuthType.BasicTokenAuth,
+            Email = "user@example.com",
+            Token = ""
+        };
+        var (valid, message) = creds.Validate();
+        Assert.False(valid);
+        Assert.Contains("Token", message!);
+    }
+
+    [Fact]
+    public void Validate_BasicTokenAuth_WhenBothSet_ReturnsTrue()
+    {
+        var creds = new RepositoryCredentials
+        {
+            AuthType = AuthType.BasicTokenAuth,
+            Email = "user@example.com",
+            Token = "token123"
         };
         var (valid, _) = creds.Validate();
         Assert.True(valid);

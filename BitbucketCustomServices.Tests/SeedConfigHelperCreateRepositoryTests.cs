@@ -7,7 +7,7 @@ namespace BitbucketCustomServices.Tests;
 public class SeedConfigHelperCreateRepositoryTests
 {
     [Fact]
-    public void CreateRepositoryFromConfig_WithBasicAuth_CreatesRepositoryWithBasicCredentials()
+    public void CreateRepositoryFromConfig_WithBasicTokenAuth_CreatesRepositoryWithBasicTokenCredentials()
     {
         var config = new SeedRepositoryConfiguration
         {
@@ -22,12 +22,31 @@ public class SeedConfigHelperCreateRepositoryTests
 
         Assert.Equal("my-repo", repo.Name);
         Assert.Equal("merge_commit", repo.MergeStrategy);
-        Assert.Equal(AuthType.Basic, repo.RepositoryCredentials.AuthType);
-        Assert.Equal("user@example.com", repo.RepositoryCredentials.Username);
-        Assert.Equal("token123", repo.RepositoryCredentials.Password);
+        Assert.Equal(AuthType.BasicTokenAuth, repo.RepositoryCredentials.AuthType);
+        Assert.Equal("user@example.com", repo.RepositoryCredentials.Email);
+        Assert.Equal("token123", repo.RepositoryCredentials.Token);
         Assert.Single(repo.BranchMappings);
         Assert.Equal("main", repo.BranchMappings[0].From);
         Assert.Equal("develop", repo.BranchMappings[0].To);
+    }
+
+    [Fact]
+    public void CreateRepositoryFromConfig_WithBasicPasswordAuth_CreatesRepositoryWithBasicPasswordCredentials()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            Name = "my-repo",
+            AuthType = "BasicPasswordAuth",
+            UserName = "myuser",
+            Password = "mypassword",
+            BranchMappings = []
+        };
+
+        var repo = SeedConfigHelper.CreateRepositoryFromConfig(config);
+
+        Assert.Equal(AuthType.BasicPasswordAuth, repo.RepositoryCredentials.AuthType);
+        Assert.Equal("myuser", repo.RepositoryCredentials.Username);
+        Assert.Equal("mypassword", repo.RepositoryCredentials.Password);
     }
 
     [Fact]
@@ -86,6 +105,38 @@ public class SeedConfigHelperCreateRepositoryTests
         var repo = SeedConfigHelper.CreateRepositoryFromConfig(config);
 
         Assert.True(repo.RepositoryNotificationSettings.IgnoreAutoMergeNotifications);
+    }
+
+    [Fact]
+    public void CreateRepositoryFromConfig_WithFeatureSwitches_SetsFlags()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            Name = "my-repo",
+            CascadeMergeEnabled = false,
+            TelegramNotificationsEnabled = false,
+            BranchMappings = []
+        };
+
+        var repo = SeedConfigHelper.CreateRepositoryFromConfig(config);
+
+        Assert.False(repo.CascadeMergeEnabled);
+        Assert.False(repo.TelegramNotificationsEnabled);
+    }
+
+    [Fact]
+    public void CreateRepositoryFromConfig_WithoutFeatureSwitches_DefaultsToFalse()
+    {
+        var config = new SeedRepositoryConfiguration
+        {
+            Name = "my-repo",
+            BranchMappings = []
+        };
+
+        var repo = SeedConfigHelper.CreateRepositoryFromConfig(config);
+
+        Assert.False(repo.CascadeMergeEnabled);
+        Assert.False(repo.TelegramNotificationsEnabled);
     }
 
     [Fact]
