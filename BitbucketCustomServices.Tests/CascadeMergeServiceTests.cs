@@ -1,4 +1,3 @@
-using System.Net.Http;
 using BitbucketCustomServices.Entities;
 using BitbucketCustomServices.Enums;
 using BitbucketCustomServices.Models;

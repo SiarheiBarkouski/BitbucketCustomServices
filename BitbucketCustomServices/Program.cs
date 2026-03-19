@@ -116,6 +116,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICascadeMergeService, CascadeMergeService>();
 builder.Services.AddScoped<IWebhookJobHandler, CascadeMergeJobHandler>();
 builder.Services.AddScoped<IWebhookJobHandler, TelegramNotificationJobHandler>();
+builder.Services.AddScoped<IWebhookJobHandler, ConflictBranchCleanupHandler>();
 
 var app = builder.Build();
 

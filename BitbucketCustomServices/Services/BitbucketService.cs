@@ -93,6 +93,23 @@ public sealed class BitbucketService : IBitbucketService
         return mergeResponse.IsSuccessStatusCode;
     }
 
+    public async Task<bool> DeleteBranch(HttpClient client,
+        string workspace,
+        string repoSlug,
+        string branchName)
+    {
+        var encodedBranch = Uri.EscapeDataString(branchName);
+        var deleteUrl = $"https://api.bitbucket.org/2.0/repositories/{workspace}/{repoSlug}/refs/branches/{encodedBranch}";
+        var response = await client.DeleteAsync(deleteUrl);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Branch deletion failed for {BranchName}. HttpStatus: {HttpStatus}",
+                branchName, response.StatusCode);
+            return false;
+        }
+        return true;
+    }
+
     public async Task<bool> CreateBranch(
         HttpClient client,
         RepositoryCredentials credentials,

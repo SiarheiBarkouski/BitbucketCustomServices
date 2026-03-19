@@ -35,4 +35,9 @@ public interface IBitbucketService
         int pullRequestId,
         string sourceBranch,
         string title);
+
+    Task<bool> DeleteBranch(HttpClient client,
+        string workspace,
+        string repoSlug,
+        string branchName);
 }

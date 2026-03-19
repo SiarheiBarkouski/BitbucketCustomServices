@@ -1,7 +1,4 @@
 using System.Net;
-using System.Text.Json;
-using BitbucketCustomServices.Entities;
-using Entities = BitbucketCustomServices.Entities;
 using BitbucketCustomServices.Enums;
 using BitbucketCustomServices.Models;
 using BitbucketCustomServices.Services;

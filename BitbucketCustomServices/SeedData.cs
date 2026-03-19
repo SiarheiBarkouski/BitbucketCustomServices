@@ -5,7 +5,6 @@ using BitbucketCustomServices.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UserEntity = BitbucketCustomServices.Entities.User;
-using RepositoryEntity = BitbucketCustomServices.Entities.Repository;
 
 namespace BitbucketCustomServices;
 

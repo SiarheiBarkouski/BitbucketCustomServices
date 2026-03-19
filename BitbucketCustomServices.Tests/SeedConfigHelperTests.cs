@@ -1,4 +1,3 @@
-using BitbucketCustomServices;
 using BitbucketCustomServices.Enums;
 using BitbucketCustomServices.Models;
 using Xunit;

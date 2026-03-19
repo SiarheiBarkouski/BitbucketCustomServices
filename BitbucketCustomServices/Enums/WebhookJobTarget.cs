@@ -4,4 +4,5 @@ public enum WebhookJobTarget
 {
     CascadeMerge,
     TelegramNotification,
+    ConflictBranchCleanup,
 }

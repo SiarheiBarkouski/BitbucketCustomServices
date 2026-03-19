@@ -2,7 +2,6 @@ using BitbucketCustomServices.Entities;
 using BitbucketCustomServices.Enums;
 using BitbucketCustomServices.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;

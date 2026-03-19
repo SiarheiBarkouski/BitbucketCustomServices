@@ -1,6 +1,5 @@
 #nullable enable
 using BitbucketCustomServices.Entities;
-using Entities = BitbucketCustomServices.Entities;
 using BitbucketCustomServices.Enums;
 using BitbucketCustomServices.Models;
 

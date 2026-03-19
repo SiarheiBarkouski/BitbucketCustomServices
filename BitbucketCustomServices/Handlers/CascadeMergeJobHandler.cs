@@ -1,7 +1,6 @@
 using BitbucketCustomServices.Enums;
 using BitbucketCustomServices.Models;
 using BitbucketCustomServices.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BitbucketCustomServices.Handlers;
 
